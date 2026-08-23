@@ -47,9 +47,9 @@ object UpdatePromotion {
             tag = "UPDATE",
             headline = "Update available",
             subhead = if (name != null) {
-                "Version $name is ready. Tap to update Skylink Bingwa."
+                "Version $name is ready. Tap to update My Bingwa."
             } else {
-                "A new version of Skylink Bingwa is ready. Tap to update."
+                "A new version of My Bingwa is ready. Tap to update."
             },
             ctaLabel = "Update",
             accent = PromotionAccent.NAVY,
@@ -108,7 +108,7 @@ fun UpdateRequiredScreen(update: UpdateResult.Available) {
             Spacer(Modifier.height(10.dp))
             Text(
                 text = update.notes.takeIf { it.isNotBlank() }
-                    ?: "A newer version of Skylink Bingwa is required to keep buying bundles. Please update to continue.",
+                    ?: "A newer version of My Bingwa is required to keep buying bundles. Please update to continue.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

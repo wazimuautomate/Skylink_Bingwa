@@ -228,7 +228,7 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "Skylink Bingwa allows you buy safaricom data, sms and minutes even if you have unpaid Okoa jahazi even if you are offline",
+                    text = "My Bingwa allows you buy safaricom data, sms and minutes even if you have unpaid Okoa jahazi even if you are offline",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -254,7 +254,7 @@ fun SettingsScreen(
                                         if (name != null) "Version $name is available." else "A new version is available."
                                     }
                                     UpdateResult.UpToDate ->
-                                        "You are on the latest version of Skylink Bingwa."
+                                        "You are on the latest version of My Bingwa."
                                     is UpdateResult.Error -> result.message
                                 }
                                 checkingUpdates = false

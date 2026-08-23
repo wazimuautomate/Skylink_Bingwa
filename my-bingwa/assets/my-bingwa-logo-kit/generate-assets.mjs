@@ -1,19 +1,20 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 const sharp = require("sharp");
 
 const projectRoot = path.resolve(
-  path.dirname(new URL(import.meta.url).pathname),
+  path.dirname(fileURLToPath(import.meta.url)),
   "../..",
 );
 
 const inputPath = path.join(
   projectRoot,
-  "upload",
-  "ChatGPT Image Jul 23, 2026, 11_21_06 PM.png",
+  "assets",
+  "new-logo.png",
 );
 
 const outputRoot = path.join(projectRoot, "assets", "my-bingwa-logo-kit");
@@ -47,7 +48,7 @@ await Promise.all(
 
 await fs.copyFile(
   inputPath,
-  path.join(sourceDir, "my-bingwa-approved-original.png"),
+  path.join(sourceDir, "new-logo.png"),
 );
 
 const { data: sourcePixels, info: sourceInfo } = await sharp(inputPath)
@@ -67,7 +68,11 @@ for (let pixel = 0; pixel < sourceInfo.width * sourceInfo.height; pixel += 1) {
   const minimum = Math.min(red, green, blue);
   const chroma = maximum - minimum;
 
-  let alpha = maximum < 60 ? 0 : Math.max(0, Math.min(1, chroma / 145));
+  // The approved logo is a full-colour mark on white. Remove only the white
+  // canvas while retaining its black outline, green type, orange accents and
+  // soft edge shading for transparent Android assets.
+  const distanceFromWhite = 255 - minimum;
+  let alpha = Math.max(0, Math.min(1, (distanceFromWhite - 18) / 72));
   if (alpha < 0.025) alpha = 0;
 
   const recoverFromWhite = (channel) => {

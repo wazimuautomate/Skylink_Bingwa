@@ -159,7 +159,7 @@ class NotificationEngine(
         val hash = contentHash(category.name, stableId, body)
         if (!NotificationPolicy.shouldPost(category, nowMillis, state, hash).allowed) return false
 
-        val safeTitle = if (title.isBlank()) "Skylink Bingwa" else title
+        val safeTitle = if (title.isBlank()) "My Bingwa" else title
         val safeBody = if (body.isBlank()) title else body
 
         val posted = notifier.postEngine(

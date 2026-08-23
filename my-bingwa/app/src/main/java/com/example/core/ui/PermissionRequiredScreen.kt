@@ -92,7 +92,7 @@ fun PermissionRequiredScreen(
             Spacer(Modifier.height(10.dp))
 
             Text(
-                text = "Skylink Bingwa needs this to let you know about your payments. Turn it " +
+                text = "My Bingwa needs this to let you know about your payments. Turn it " +
                     "back on to carry on using the app.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -130,7 +130,7 @@ fun PermissionRequiredScreen(
             Spacer(Modifier.height(10.dp))
 
             SecondaryButton(
-                text = "Close Skylink Bingwa",
+                text = "Close My Bingwa",
                 onClick = onExitApp,
                 testTag = "permission_required_exit"
             )

@@ -63,8 +63,8 @@ class AppNotifier(private val context: Context) {
     ): Boolean = post(
         channelId = NotificationChannels.UPDATES,
         stableId = "update_$versionName",
-        title = "Skylink Bingwa $versionName is available",
-        body = "A new version of Skylink Bingwa is ready. Tap to learn what is new.",
+        title = "My Bingwa $versionName is available",
+        body = "A new version of My Bingwa is ready. Tap to learn what is new.",
         deepLinkRoute = deepLinkRoute
     )
 

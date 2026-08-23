@@ -1,14 +1,14 @@
-# My Bingwa Final Logo Asset Kit
+# My Bingwa Logo Asset Kit
 
 This pack is generated from the approved source logo without regenerating or
 redrawing its symbol.
 
 ## Important source correction
 
-The approved PNG contains a white rounded tile and black corners baked into a
-non-transparent image. Those pixels are unsuitable for adaptive icons and
-transparent in-app branding. The production assets isolate the original
-green/orange symbol while preserving its gradients.
+The approved PNG is the full My Bingwa lock-up on a white canvas. The production
+assets retain the original black outline, green type, orange accents and soft
+edge shading, while removing only the white canvas where Android needs a
+transparent foreground.
 
 The approved source is a raster PNG, not a true vector file. The 1254px source
 is more than sufficient for all Android, Play Store and web sizes in this pack,
@@ -21,7 +21,7 @@ paths.
 
 ### `source`
 
-- `my-bingwa-approved-original.png` — untouched uploaded source.
+- `new-logo.png` — untouched approved source artwork.
 
 ### `brand`
 
@@ -29,9 +29,9 @@ paths.
 - Black monochrome 1024px mark.
 - White monochrome 1024px mark.
 
-Use the transparent mark inside the app. For a header lock-up, render the mark
-beside **My Bingwa** using the bundled Outfit heading font rather than baking
-text into a raster file.
+Use the transparent mark inside the app and for the header lock-up. The approved
+artwork already contains the My Bingwa wordmark, so do not add separate text to
+it.
 
 ### `android`
 

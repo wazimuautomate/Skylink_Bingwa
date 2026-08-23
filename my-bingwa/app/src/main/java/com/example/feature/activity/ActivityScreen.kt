@@ -197,7 +197,7 @@ fun ActivityScreen(
                 EmptyStateView(
                     icon = Icons.Outlined.History,
                     title = "No purchases yet",
-                    description = "Bundles you pay for in Skylink Bingwa will appear here.",
+                    description = "Bundles you pay for in My Bingwa will appear here.",
                     actionText = "Browse offers",
                     onActionClick = onBrowseOffers
                 )

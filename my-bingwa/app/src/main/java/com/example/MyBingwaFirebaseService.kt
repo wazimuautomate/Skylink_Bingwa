@@ -36,7 +36,7 @@ class MyBingwaFirebaseService : FirebaseMessagingService() {
 
         val title = remoteMessage.data["title"]
             ?: remoteMessage.notification?.title
-            ?: "Skylink Bingwa"
+            ?: "My Bingwa"
         val body = remoteMessage.data["body"]
             ?: remoteMessage.notification?.body
             ?: return

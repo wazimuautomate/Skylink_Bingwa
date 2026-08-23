@@ -71,16 +71,16 @@ object NotificationChannels {
             "App updates",
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "News about new versions of Skylink Bingwa."
+            description = "News about new versions of My Bingwa."
             enableVibration(false)
         }
 
         val news = NotificationChannel(
             NEWS,
-            "News from Skylink Bingwa",
+            "News from My Bingwa",
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "Occasional messages from Skylink Bingwa. Quiet by default."
+            description = "Occasional messages from My Bingwa. Quiet by default."
             setSound(null, null)
             enableVibration(false)
         }

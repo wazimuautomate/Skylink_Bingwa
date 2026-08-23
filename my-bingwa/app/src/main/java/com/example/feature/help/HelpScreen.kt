@@ -134,7 +134,7 @@ fun HelpScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Skylink Bingwa Support Line",
+                    text = "My Bingwa Support Line",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -497,4 +497,3 @@ private fun FaqAccordionRow(item: FaqItem) {
         }
     }
 }
-

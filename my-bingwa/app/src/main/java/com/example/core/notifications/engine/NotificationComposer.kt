@@ -87,7 +87,7 @@ object NotificationComposer {
 
         val body = render(chosen.body, name, values)
         if (body.isEmpty()) return null
-        val title = render(chosen.title, name, values).ifEmpty { "Skylink Bingwa" }
+        val title = render(chosen.title, name, values).ifEmpty { "My Bingwa" }
 
         return ComposedNotification(templateId = chosen.id, title = title, body = body)
     }

@@ -313,7 +313,7 @@ fun OnboardingScreen(
                     OnboardingStep.WELCOME -> "Get started"
                     OnboardingStep.SETUP -> "Continue"
                     OnboardingStep.NOTIFICATIONS -> when {
-                        notificationsGranted -> if (lastStep) "Start using Skylink Bingwa" else "Continue"
+                        notificationsGranted -> if (lastStep) "Start using My Bingwa" else "Continue"
                         notificationAsks >= 2 -> "Open settings and allow"
                         notificationAsks == 1 -> "Try again"
                         else -> "Turn on updates"
@@ -353,7 +353,7 @@ fun OnboardingScreen(
                         modifier = Modifier.testTag("onboarding_permission_exit")
                     ) {
                         Text(
-                            text = "Close Skylink Bingwa",
+                            text = "Close My Bingwa",
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -448,7 +448,7 @@ private fun AmbientBackdrop(reducedMotion: Boolean) {
 private fun LogoHero(reducedMotion: Boolean) {
     Image(
         painter = painterResource(id = com.example.R.drawable.img_onboarding_logo),
-        contentDescription = "Skylink Bingwa Logo",
+        contentDescription = "My Bingwa logo",
         modifier = Modifier.size(80.dp)
     )
 }
@@ -471,7 +471,7 @@ private fun StepWelcome(reducedMotion: Boolean) {
 
         StaggeredItem(intro.value, 0.10f) {
             Text(
-                text = "Welcome to Skylink Bingwa",
+                text = "Welcome to My Bingwa",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -661,7 +661,7 @@ private fun StepNotifications(granted: Boolean, refused: Boolean, reducedMotion:
         accent = AccentData,
         stepTag = "onboarding_step_notifications",
         title = "Know the moment it lands",
-        lead = "Skylink Bingwa tells you when your M-Pesa payment is received and when a " +
+        lead = "My Bingwa tells you when your M-Pesa payment is received and when a " +
             "bundle you buy often is back on sale. This is how the app keeps you " +
             "informed, so it has to be on to continue.",
         bullets = listOf(
@@ -669,10 +669,10 @@ private fun StepNotifications(granted: Boolean, refused: Boolean, reducedMotion:
             "Quiet hours are respected — nothing wakes you at night.",
             "Nothing is sold, shared or uploaded to show you these."
         ),
-        privacyNote = "Required to use Skylink Bingwa.",
+        privacyNote = "Required to use My Bingwa.",
         granted = granted,
         grantedText = "Notifications are on. We will keep them useful, not noisy.",
-        deniedText = "Skylink Bingwa cannot continue without notifications. Allow them to " +
+        deniedText = "My Bingwa cannot continue without notifications. Allow them to " +
             "carry on, or close the app.",
         refused = refused,
         reducedMotion = reducedMotion
@@ -837,7 +837,7 @@ private fun StepSetup(
     ) {
         Spacer(Modifier.height(12.dp))
         Text(
-            text = "Make Skylink Bingwa yours.",
+            text = "Make My Bingwa yours.",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,

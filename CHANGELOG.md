@@ -10,6 +10,23 @@ Sections used: `Added`, `Changed`, `Fixed`, `Removed`, `Security`, `Internal`
 
 ## [Unreleased]
 
+## [1.0.11] - 2026-08-23
+
+### Changed
+
+- Restored the customer-facing app name to **My Bingwa** across the launcher,
+  onboarding, settings, help, notifications, and update messages, while keeping
+  the production application ID `com.bingwasokoni` unchanged.
+- Replaced the previous brand artwork with the approved `new-logo.png` in every
+  Android launcher, adaptive, splash, onboarding, notification, and Play Store
+  logo asset.
+
+### Internal
+
+- `versionCode` 11 → 12 and `versionName` 1.0.10 → 1.0.11.
+- Made the logo asset generator Windows-safe and reproducible from the approved
+  source artwork.
+
 ## [1.0.10] - 2026-08-22
 
 ### Added

@@ -70,7 +70,7 @@ fun UpdateInstallControls(
         // github: ensure we may install first (Android 8+ "install unknown apps").
         if (!installer.canInstallPackages()) {
             installer.openInstallPermissionSettings()
-            status = "Allow installing apps from Skylink Bingwa, then tap Update again."
+            status = "Allow installing apps from My Bingwa, then tap Update again."
             return
         }
         downloading = true

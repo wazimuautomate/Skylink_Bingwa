@@ -24,14 +24,14 @@ android {
     // GitHub and Play channels and updates supersede correctly (same signing
     // identity — see signingConfigs + docs/RELEASE_PLAYSTORE.md). Bump BOTH for
     // every release; versionCode must only ever increase.
-    versionCode = 11
-    versionName = "1.0.10"
+    versionCode = 12
+    versionName = "1.0.11"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
     // Launcher label. Overridden to "My Bingwa Dev" for debug builds so a debug
     // install is visually distinct from and installable alongside the release app.
-    manifestPlaceholders["appLabel"] = "Skylink Bingwa"
+    manifestPlaceholders["appLabel"] = "My Bingwa"
 
     // Where the DEBUG build's update check reads its manifest. Non-secret. See
     // update.json at the repo root and core/update/UpdateChecker.kt. Only consulted
@@ -171,7 +171,7 @@ android {
     debug {
       applicationIdSuffix = ".debug"
       versionNameSuffix = "-debug"
-      manifestPlaceholders["appLabel"] = "Skylink Bingwa Dev"
+      manifestPlaceholders["appLabel"] = "My Bingwa Dev"
       // A buildType field overrides the flavour field, so debug builds always keep
       // the GitHub updater — including the `play` debug variant, which testers
       // install by sideloading and therefore still need an in-app upgrade path.
