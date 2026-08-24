@@ -696,6 +696,16 @@ class FakeBingwaRepositoryImpl(
         _fcmToken.value = token
         CoroutineScope(Dispatchers.IO).launch {
             val source = customerSource ?: return@launch
+            // Same race registerCustomer() guards against, and it matters MORE here: for
+            // an already-onboarded install, registerCustomer() short-circuits on
+            // _customerRegistered and never runs again, so this is the ONLY path left
+            // that can ever deliver a token to the server. FirebaseMessaging's token
+            // callback can resolve before the on-disk profile restore finishes on a cold
+            // start (a network round-trip racing a local disk read), and without this
+            // await, reading _userProfile.value here returns the default
+            // isOnboardingCompleted = false and silently drops the token — even though
+            // onboarding genuinely finished, on disk, long ago.
+            restoreComplete.await()
             val profile = _userProfile.value
             if (!profile.isOnboardingCompleted) return@launch
             val name = profile.name.trim()
