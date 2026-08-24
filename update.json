@@ -1,10 +1,10 @@
 {
-  "latestVersionCode": 13,
-  "latestVersionName": "1.0.12",
+  "latestVersionCode": 14,
+  "latestVersionName": "1.0.13",
   "minSupportedVersionCode": 1,
   "updateSource": "play",
-  "apkUrl": "https://github.com/wazimuautomate/Skylink_Bingwa/releases/download/v1.0.12/Skylink-Bingwa-v1.0.12-direct.apk",
+  "apkUrl": "https://github.com/wazimuautomate/Skylink_Bingwa/releases/download/v1.0.13/Skylink-Bingwa-v1.0.13-direct.apk",
   "apkSha256": "",
-  "releaseNotes": "The app is called Skylink Bingwa again, with the original Skylink-era logo restored. Admin push notifications now work: sending from the dashboard no longer fails, and a broadcast reaches the phone instantly and is recorded in the in-app notification centre.",
-  "mandatory": false
+  "releaseNotes": "The app is called Skylink Bingwa again, with the original Skylink-era logo restored. Admin push notifications now work: sending from the dashboard delivers instantly and is recorded in the in-app notification centre. Fixes v1.0.12, which shipped without a real Firebase connection and could never receive a push.",
+  "mandatory": true
 }
