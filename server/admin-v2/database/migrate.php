@@ -3,9 +3,15 @@
  * Migration runner. Applies every database/migrations/*.sql file that has not run yet,
  * in filename order, recording each in `mb_migrations`. Idempotent and safe to re-run.
  *
- * Run it two ways:
- *   - CLI:  php database/migrate.php
- *   - Web:  visit /migrate once (Super Admin only) — see MigrateController.
+ * It runs BY ITSELF: App\Core\Installer::autoProvision() is invoked from index.php on
+ * every request and always calls Migrator::run(), so loading any admin page applies
+ * whatever is pending. Nothing needs to be triggered by hand.
+ *
+ * It can also be run directly from the CLI (cPanel Terminal / SSH):
+ *   php database/migrate.php
+ *
+ * NOTE: there is deliberately no /migrate route and no MigrateController — this comment
+ * used to claim there was, and sent people to a 404.
  *
  * Migration files are plain SQL; statements are separated by a line that is exactly
  * "-- @@" so multi-statement files apply cleanly on shared hosting.

@@ -132,7 +132,7 @@ use App\Core\Csrf;
   <?php if (!empty($historyError)): ?>
     <div class="empty" style="text-align: center; padding: 2rem; color: #b45309;">
       <p><?= e($historyError) ?></p>
-      <p style="font-size: 0.85rem;">Run <code>php database/migrate.php</code>, or open <code>/migrate</code> as a Super Admin.</p>
+      <p style="font-size: 0.85rem;">Migrations apply automatically on the next page load. If this persists, the migration is failing &mdash; check the PHP error log for <code>auto-migrate failed</code>.</p>
     </div>
   <?php elseif (empty($history)): ?>
     <div class="empty" style="text-align: center; padding: 2rem; color: var(--text-muted, #64748b);">

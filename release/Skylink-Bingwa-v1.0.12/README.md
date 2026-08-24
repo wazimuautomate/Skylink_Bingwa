@@ -133,8 +133,25 @@ These four carry the actual fix. Nothing works without them.
 because `Migrator::run()` stops at the first error, anything after it is pending too.
 Apply it **after** uploading the corrected file, either way:
 
-- **Web:** sign in as a Super Admin and open `/migrate`, or
-- **SSH:** `php database/migrate.php` from the `admin/` directory.
+**Nothing needs to be triggered by hand.** `Installer::autoProvision()` runs from
+`index.php` on *every* request and always calls `Migrator::run()`, so simply loading any
+admin page applies whatever is pending. Just open the dashboard once after uploading.
+
+(There is no `/migrate` route — an earlier revision of this file said there was, and it
+404s. If you have cPanel Terminal or SSH you can also run `php database/migrate.php` from
+the `admin/` directory, but you do not need to.)
+
+Confirm it applied, in phpMyAdmin:
+
+```sql
+SELECT filename, applied_at FROM mb_migrations ORDER BY id DESC LIMIT 5;
+SHOW COLUMNS FROM mb_customers LIKE 'fcm_token';
+SHOW TABLES LIKE 'mb_push_broadcasts';
+```
+
+You want `021_fcm_push.sql` listed, one `fcm_token` column, and the
+`mb_push_broadcasts` table present. If it is missing, the PHP error log will carry
+`[skylinkbingwa-admin] auto-migrate failed: ...` with the reason.
 
 Expect `021_fcm_push.sql` in the "Applied" list. The rewritten migration is idempotent, so
 it is safe whether or not `fcm_token` already exists on `mb_customers`.
