@@ -17,6 +17,7 @@ jobs:
         run: |
           echo "raw length of PAYMENTS_BASE_URL: ${#PAYMENTS_BASE_URL}"
           TRIMMED="$(printf '%s' "$PAYMENTS_BASE_URL" | tr -d '[:space:]')"
+          [[ "$TRIMMED" == */ ]] || TRIMMED="${TRIMMED}/"
           echo "trimmed length: ${#TRIMMED}"
           echo "starts with https://: $([[ "$PAYMENTS_BASE_URL" == https://* ]] && echo yes || echo no)"
           echo "ends with /: $([[ "$PAYMENTS_BASE_URL" == */ ]] && echo yes || echo no)"
