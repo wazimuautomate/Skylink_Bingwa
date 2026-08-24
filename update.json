@@ -1,10 +1,10 @@
 {
-  "latestVersionCode": 15,
-  "latestVersionName": "1.0.14",
+  "latestVersionCode": 16,
+  "latestVersionName": "1.0.15",
   "minSupportedVersionCode": 1,
   "updateSource": "play",
-  "apkUrl": "https://github.com/wazimuautomate/Skylink_Bingwa/releases/download/v1.0.14/Skylink-Bingwa-v1.0.14-direct.apk",
+  "apkUrl": "https://github.com/wazimuautomate/Skylink_Bingwa/releases/download/v1.0.15/Skylink-Bingwa-v1.0.15-direct.apk",
   "apkSha256": "",
-  "releaseNotes": "Fixes a startup race that could silently drop the FCM push token for an already-onboarded install (v1.0.13, and every version before it). Sending a push from the admin dashboard should now report an actual delivered device count and arrive on the phone.",
+  "releaseNotes": "The actual Android app registration in Firebase never existed until now -- every prior build shipped with a fabricated, invalid Firebase config, no matter how correct the surrounding code was. This version carries the genuine app registration and API key, verified directly against Google's servers. Push notifications should now work end-to-end.",
   "mandatory": true
 }

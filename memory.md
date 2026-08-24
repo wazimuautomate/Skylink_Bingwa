@@ -1802,3 +1802,70 @@ destinations.
   - User to install v1.0.14 (updates cleanly over v1.0.13) and resend the push.
   - No server or Firebase-config re-upload needed — only `FakeBingwaRepositoryImpl.kt`
     changed in this release.
+
+---
+
+## 2026-08-24 — v1.0.15: the real root cause — no Android app was ever registered in Firebase
+
+- **Symptom:** v1.0.14 (real signing, real project_id string, fixed cold-start race) STILL
+  reported "No device has registered its token yet" and no notification arrived, on the
+  user's actual test phone.
+
+- **Root cause, found this time by testing against Google's live servers directly rather
+  than reasoning about the code:**
+  1. `curl` to `firebaseinstallations.googleapis.com` using the app's baked-in API key
+     returned `400 API_KEY_INVALID`.
+  2. Fetched the LIVE project via the Firebase Management API (using the existing FCM
+     service-account key, `my-bingwa-b538e0f6c645.json`, minted into an OAuth2 token) and
+     found the real project number is `763690457362` — but every `google-services.json`
+     used since v1.0.10, including the "verified real" one used in v1.0.13/v1.0.14, carried
+     project number `111803005684`. **These never matched.**
+  3. `GET /v1beta1/projects/my-bingwa/androidApps` returned **zero** registered apps.
+     Conclusion: no Android app had EVER been genuinely registered in this Firebase
+     project. The `google-services.json` that had been sitting in the repo (and that a
+     previous session apparently trusted as "the real one") was itself fabricated —
+     plausible-looking structure, matching `project_id` string, but a synthetic project
+     number and the literal placeholder key `AIzaSyDummyKeyForGoogleServicesCompilationOnly`.
+     Every FCM attempt on every version shipped today was structurally incapable of
+     succeeding, regardless of any CI-secret or race-condition fix — those fixes were
+     necessary but nowhere near sufficient.
+
+- **Fix:** the user registered a real Android app (`com.bingwasokoni`) in Firebase Console
+  themselves and provided the genuine `google-services.json` (project number
+  `763690457362`, a real `AIzaSy...` key). Verified this key against
+  `firebaseinstallations.googleapis.com` directly — **HTTP 200, real installation
+  created** — before touching any build. A second gap surfaced immediately: the debug
+  build (`com.bingwasokoni.debug`, from `applicationIdSuffix = ".debug"`) has no matching
+  client in a single-app config, and the `google-services` Gradle plugin **hard-fails**
+  the build for that variant (confirmed by actually running
+  `processDirectDebugGoogleServices` locally, not assumed) — this would have broken the
+  CI debug gate. Fixed by registering a second Firebase Android app for
+  `com.bingwasokoni.debug` via the same Management API (`POST .../androidApps`, an async
+  operation, polled for completion), then fetching the MERGED two-client config via
+  `GET .../androidApps/{appId}/config`. Both variants now build clean.
+  `GOOGLE_SERVICES_JSON` CI secret updated to the real merged content.
+
+- **Also cleaned up:** the temporary `_diag-register.yml` workflow (used to test the
+  `PAYMENTS_APP_KEY`/`register_user.php` pipeline directly from CI, which conclusively
+  proved that pipeline was ALWAYS fine — HTTP 200 `{"status":"REGISTERED"}` — ruling out
+  the server/app-key layer entirely and narrowing the problem to Firebase specifically)
+  is deleted, its job done.
+
+- **Verification:**
+  - `./gradlew :app:processDirectDebugGoogleServices :app:processDirectReleaseGoogleServices`
+    — SUCCESS for both variants, locally, before pushing.
+  - Live REST test of the real API key against Google's Firebase Installations
+    backend — HTTP 200.
+  - (Full CI + signed-release + apksigner/aapt2 verification recorded in the next entry
+    once the v1.0.15 pipeline completes.)
+
+- **Where this leaves the project:** `skylink-bingwa/app/google-services.json` now holds
+  the FIRST genuinely correct Firebase config this project has ever had. It stays
+  gitignored, as designed — the only place its real content lives is the
+  `GOOGLE_SERVICES_JSON` GitHub Actions secret.
+
+- **Lesson, sharper than the previous entry's:** verifying "the project_id string matches"
+  was not verification — it was checking one field of a file that could still be entirely
+  fabricated. The only real verification is testing the credential against the actual
+  external service it claims to authenticate with. Do that BEFORE spending a rebuild
+  cycle, not after a user reports it still doesn't work.
