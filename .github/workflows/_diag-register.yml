@@ -10,16 +10,32 @@ jobs:
   diag:
     runs-on: ubuntu-latest
     steps:
-      - name: Call register_user.php with the real app key
+      - name: Diagnose base URL and connectivity
         env:
           PAYMENTS_APP_KEY: ${{ secrets.PAYMENTS_APP_KEY }}
           PAYMENTS_BASE_URL: ${{ secrets.PAYMENTS_BASE_URL }}
         run: |
-          BASE="${PAYMENTS_BASE_URL:-https://mybingwa.blazetechscope.com/}"
-          echo "Base URL host (not the key): $(echo "$BASE" | sed -E 's#https?://([^/]+).*#\1#')"
-          curl -s -o response.json -w "HTTP_STATUS:%{http_code}\n" -X POST "${BASE}register_user.php" \
+          echo "raw length of PAYMENTS_BASE_URL: ${#PAYMENTS_BASE_URL}"
+          TRIMMED="$(printf '%s' "$PAYMENTS_BASE_URL" | tr -d '[:space:]')"
+          echo "trimmed length: ${#TRIMMED}"
+          echo "starts with https://: $([[ "$PAYMENTS_BASE_URL" == https://* ]] && echo yes || echo no)"
+          echo "ends with /: $([[ "$PAYMENTS_BASE_URL" == */ ]] && echo yes || echo no)"
+          echo "app key raw length: ${#PAYMENTS_APP_KEY}"
+          echo "app key trimmed length: $(printf '%s' "$PAYMENTS_APP_KEY" | tr -d '[:space:]' | wc -c)"
+
+          echo "--- general internet sanity ---"
+          curl -s -o /dev/null -w "google HTTP_STATUS:%{http_code}\n" https://www.google.com || echo "google curl failed: $?"
+
+          echo "--- DNS for the real host ---"
+          getent hosts mybingwa.blazetechscope.com || echo "getent failed to resolve mybingwa.blazetechscope.com"
+
+          echo "--- request using TRIMMED base url ---"
+          curl -sv -o response.json -w "TRIMMED_HTTP_STATUS:%{http_code}\n" -X POST "${TRIMMED}register_user.php" \
             -H "Content-Type: application/json" \
             -H "X-App-Key: ${PAYMENTS_APP_KEY}" \
-            -d '{"name":"CI Diagnostic","msisdn":"254700000000","appVersion":"ci-diag","fcm_token":"ci-diagnostic-token-do-not-use"}'
-          echo "Response body:"
-          cat response.json
+            -d '{"name":"CI Diagnostic","msisdn":"254700000000","appVersion":"ci-diag","fcm_token":"ci-diagnostic-token-do-not-use"}' 2>curl_verbose.log
+          echo "curl exit: $?"
+          echo "--- response body ---"
+          cat response.json 2>/dev/null || echo "(no response body file)"
+          echo "--- curl verbose (connection info only, headers/body redacted by nature of -v to stderr) ---"
+          grep -E "Trying|Connected to|Could not resolve|SSL connection|HTTP/" curl_verbose.log || true
