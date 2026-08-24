@@ -30,7 +30,7 @@ final class ImportController extends Controller
     {
         $this->guard('billboards.manage');
         if ($request->get('sample') !== null) {
-            self::downloadSample('mybingwa-billboards-template.json', JsonImporter::billboardSample());
+            self::downloadSample('skylinkbingwa-billboards-template.json', JsonImporter::billboardSample());
         }
         $this->view('import/index', [
             'activeNav' => 'billboards',
@@ -91,7 +91,7 @@ final class ImportController extends Controller
     {
         $this->guard('notifications.create');
         if ($request->get('sample') !== null) {
-            self::downloadSample('mybingwa-notifications-template.json', JsonImporter::notificationSample());
+            self::downloadSample('skylinkbingwa-notifications-template.json', JsonImporter::notificationSample());
         }
         $this->view('import/index', [
             'activeNav' => 'notifications',

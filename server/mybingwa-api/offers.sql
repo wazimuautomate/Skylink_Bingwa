@@ -1,4 +1,4 @@
--- My Bingwa offers catalogue. Optional: the admin panel creates this table
+-- Skylink Bingwa offers catalogue. Optional: the admin panel creates this table
 -- automatically. Import this once (phpMyAdmin → Import) to seed it with the
 -- current catalogue so the app fetches real offers immediately.
 

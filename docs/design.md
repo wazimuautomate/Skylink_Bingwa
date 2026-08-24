@@ -1,4 +1,4 @@
-# My Bingwa — UI and UX Design System
+# Skylink Bingwa — UI and UX Design System
 
 **Design direction:** Calm Momentum  
 **Platform:** Native Android  
@@ -10,7 +10,7 @@
 
 ## 1. Purpose
 
-This document defines how My Bingwa must look, feel, communicate and behave.
+This document defines how Skylink Bingwa must look, feel, communicate and behave.
 It is not a collection of visual suggestions. It is the shared design contract
 for product design, prototypes, Android implementation, content and quality
 assurance.
@@ -19,7 +19,7 @@ When this document and a mock-up disagree, this document wins. When a visual
 idea conflicts with payment clarity, accessibility, offline reliability or the
 product rules in `Plan.md`, those product needs win.
 
-My Bingwa should feel:
+Skylink Bingwa should feel:
 
 - Fast without feeling rushed.
 - Sleek without becoming decorative.
@@ -72,7 +72,7 @@ It does not mean more animation, more colour or novel navigation. It means:
 
 Every screen, prototype and message must respect these facts:
 
-- My Bingwa sells only the owner's Bingwa offers.
+- Skylink Bingwa sells only the owner's Bingwa offers.
 - Version 1 is Android only.
 - Customers do not create an account and do not complete OTP verification.
 - The first launch collects a name and primary Safaricom phone number and saves
@@ -86,7 +86,7 @@ Every screen, prototype and message must respect these facts:
 - Bundle fulfilment happens outside the customer app.
 - Activity, favourites, profile and purchase awareness are local to the current
   installation.
-- Daily purchase awareness uses successful My Bingwa purchases and offer policy.
+- Daily purchase awareness uses successful Skylink Bingwa purchases and offer policy.
 - The app does not inspect remaining data, general device usage, other apps or
   browsing behaviour.
 - Referrals, rewards, credits and tokens are not part of version 1.
@@ -147,9 +147,9 @@ dropped connection. Failed submission never clears valid input.
 
 ## 5. Relevant UX Laws and Their Application
 
-Only rules that materially improve My Bingwa are included.
+Only rules that materially improve Skylink Bingwa are included.
 
-| UX principle | My Bingwa application | Enforcement |
+| UX principle | Skylink Bingwa application | Enforcement |
 |---|---|---|
 | Fitts's Law | Put large primary actions in the lower thumb zone | Minimum 48dp targets; full-width payment CTA |
 | Hick's Law | Reduce competing choices | Four primary destinations; progressive filters; one CTA |
@@ -529,7 +529,7 @@ labelled entry in Help. It is not a fifth bottom-navigation item.
 
 Use a compact top app bar:
 
-- Page title or My Bingwa mark.
+- Page title or Skylink Bingwa mark.
 - Optional notification control.
 - Optional profile/settings control.
 - No duplicate title when the first content heading already names the page.
@@ -790,7 +790,7 @@ Each state has:
 Example:
 
 **No purchases yet**  
-Bundles you pay for in My Bingwa will appear here.  
+Bundles you pay for in Skylink Bingwa will appear here.  
 **Browse offers**
 
 ---
@@ -1030,7 +1030,7 @@ Group rows into:
 
 **About**
 
-- About My Bingwa.
+- About Skylink Bingwa.
 - Version name.
 - Version code where helpful.
 - Privacy policy.
@@ -1077,7 +1077,7 @@ This is purchase-policy awareness, not data recommendation.
 
 The UI may use:
 
-- Successful purchases recorded by My Bingwa.
+- Successful purchases recorded by Skylink Bingwa.
 - Recipient number.
 - Offer purchase limits.
 - The Nairobi calendar day.
@@ -1149,7 +1149,7 @@ Examples:
 - **Available again today**  
   Your saved 1 GB offer can be bought again.
 - **Still useful offline**  
-  Open My Bingwa to buy from your saved offers using M-Pesa.
+  Open Skylink Bingwa to buy from your saved offers using M-Pesa.
 
 ### 17.4 Restraint
 
@@ -1213,7 +1213,7 @@ Bad:
 
 ### 19.1 Voice
 
-My Bingwa speaks like a calm, capable Kenyan service:
+Skylink Bingwa speaks like a calm, capable Kenyan service:
 
 - Direct.
 - Brief.
@@ -1420,7 +1420,7 @@ Build design primitives in this order:
 
 For Android:
 
-- Implement with Material 3 foundations and custom My Bingwa tokens.
+- Implement with Material 3 foundations and custom Skylink Bingwa tokens.
 - Do not rely on default Material colours without mapping them to this system.
 - Use Compose previews for light/dark, font scale and common device widths.
 - Keep semantic token names in code; never scatter raw hex values through
@@ -1433,7 +1433,7 @@ For Android:
 
 ## 25. Final Direction
 
-My Bingwa should look unmistakably modern, but its strongest impression should
+Skylink Bingwa should look unmistakably modern, but its strongest impression should
 be confidence:
 
 - The catalogue is already there.
@@ -1443,5 +1443,5 @@ be confidence:
 - The app says exactly what it knows.
 - The next useful action is always visible.
 
-That combination—not visual excess—is the “crazy good” experience My Bingwa
+That combination—not visual excess—is the “crazy good” experience Skylink Bingwa
 should own.

@@ -226,7 +226,7 @@ Required before production release:
 
 Scope:
 
-- Debug `.debug` applicationId suffix and **My Bingwa Dev** label.
+- Debug `.debug` applicationId suffix and **Skylink Bingwa Dev** label.
 - `directRelease` APK and `playRelease` AAB.
 - Semantic `versionName` and increasing `versionCode`.
 - Feature-branch debug APK artifacts.

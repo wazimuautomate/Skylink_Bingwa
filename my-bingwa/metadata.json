@@ -1,6 +1,0 @@
-{
-  "name": "My Bingwa",
-  "description": "Browse and buy My Bingwa data, SMS, minutes, and special offers with instant M-Pesa or offline support.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

@@ -1,4 +1,4 @@
-# My Bingwa server checks
+# Skylink Bingwa server checks
 #
 # The admin panel is deployed by hand through cPanel and the development machine has no PHP
 # runtime, so this workflow is the authoritative place where the PHP actually runs. It lints

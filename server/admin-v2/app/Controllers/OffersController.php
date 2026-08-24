@@ -219,7 +219,7 @@ final class OffersController extends Controller
             'q' => (string) $request->get('q', ''), 'category' => (string) $request->get('category', ''),
             'status' => (string) $request->get('status', ''),
         ]);
-        Csv::stream('mybingwa-offers.csv',
+        Csv::stream('skylinkbingwa-offers.csv',
             ['offer_id', 'category', 'name', 'price', 'validity', 'band', 'daily_rule',
              'available_from', 'available_to', 'offline_eligible', 'status'],
             array_map(fn($o) => [

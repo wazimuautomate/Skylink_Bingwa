@@ -276,7 +276,7 @@ foreach ($errs as $errKey => $errMsg) {
           </div>
           <div class="field">
             <label for="nf-deeplink">Where tapping it goes <span class="muted small">(optional)</span></label>
-            <input id="nf-deeplink" type="text" name="deep_link" maxlength="120" value="<?= e($val('deep_link')) ?>" placeholder="mybingwa://offers/data_6">
+            <input id="nf-deeplink" type="text" name="deep_link" maxlength="120" value="<?= e($val('deep_link')) ?>" placeholder="skylinkbingwa://offers/data_6">
           </div>
           <div class="field">
             <label for="nf-expires">Hard stop <span class="muted small">(optional)</span></label>
@@ -311,11 +311,11 @@ foreach ($errs as $errKey => $errMsg) {
         <div class="card__head"><?= icon('phone', 18) ?><h3>On the phone</h3></div>
         <div class="phone">
           <div style="background:var(--surface);border:1px solid var(--divider);border-radius:14px;padding:12px;display:flex;gap:10px">
-            <img class="brand__logo" src="<?= e(asset('img/logo.png')) ?>" alt="My Bingwa" style="width:28px;height:28px;border-radius:8px">
+            <img class="brand__logo" src="<?= e(asset('img/logo.png')) ?>" alt="Skylink Bingwa" style="width:28px;height:28px;border-radius:8px">
             <div style="min-width:0">
               <b class="small" id="pv-title" data-empty="Notification title"><?= e(trim((string) ($rows[0]['title'] ?? '')) !== '' ? $rows[0]['title'] : 'Notification title') ?></b>
               <div class="small muted" id="pv-body" data-empty="Message preview"><?= e(trim((string) ($rows[0]['body'] ?? '')) !== '' ? $rows[0]['body'] : 'Message preview') ?></div>
-              <div class="small muted mt">My Bingwa · now</div>
+              <div class="small muted mt">Skylink Bingwa · now</div>
             </div>
           </div>
         </div>

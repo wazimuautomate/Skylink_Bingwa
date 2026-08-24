@@ -1,4 +1,4 @@
-# My Bingwa Admin V2 — cPanel Deployment Guide
+# Skylink Bingwa Admin V2 — cPanel Deployment Guide
 
 Admin V2 is plain PHP 8.2+ with **no runtime Composer/Node dependency**. You upload the
 folder, create `config.php`, and open the URL — it installs itself (no phpMyAdmin, no SQL).

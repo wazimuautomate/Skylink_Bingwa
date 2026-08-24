@@ -1,4 +1,6 @@
 <?php
+use App\Core\Csrf;
+
 /**
  * Instant Push Notifications View.
  *
@@ -29,8 +31,11 @@
           ✕ Firebase Credentials Missing
         </span>
         <p class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">
-          Place <code>my-bingwa-b538e0f6c645.json</code> in the server root or configure <code>fcm.service_account_file</code> in <code>config.php</code>.
+          Place the Firebase service-account JSON in the server root or set <code>fcm.service_account_file</code> in <code>config.php</code>.
         </p>
+        <?php if (!empty($configError)): ?>
+          <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem; word-break: break-all;"><?= e($configError) ?></p>
+        <?php endif; ?>
       <?php endif; ?>
     </div>
 
@@ -53,7 +58,7 @@
     </h3>
 
     <form method="POST" action="<?= e(url('/push/send')) ?>">
-      <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
+      <?= Csrf::field() ?>
 
       <div class="form-group" style="margin-bottom: 1rem;">
         <label for="push_title" style="display: block; font-weight: 600; margin-bottom: 0.35rem;">Notification Title *</label>
@@ -91,11 +96,18 @@
           class="form-control"
           style="width: 100%; padding: 0.6rem; border: 1px solid var(--border-color, #cbd5e1); border-radius: 6px;"
         >
-          <option value="notifications">Notifications Center</option>
-          <option value="offers">Offers Catalogue</option>
-          <option value="home">Home Screen</option>
-          <option value="activity">Activity History</option>
-          <option value="help">Support & Help</option>
+          <?php
+            $routeLabels = [
+              'notifications' => 'Notifications Center',
+              'offers'        => 'Offers Catalogue',
+              'home'          => 'Home Screen',
+              'activity'      => 'Activity History',
+              'help'          => 'Support & Help',
+            ];
+            foreach (($routes ?? array_keys($routeLabels)) as $r):
+          ?>
+            <option value="<?= e($r) ?>"><?= e($routeLabels[$r] ?? ucfirst($r)) ?></option>
+          <?php endforeach; ?>
         </select>
       </div>
 
@@ -117,7 +129,12 @@
     <?= icon('clock', 20) ?> Recent Broadcasts
   </h3>
 
-  <?php if (empty($history)): ?>
+  <?php if (!empty($historyError)): ?>
+    <div class="empty" style="text-align: center; padding: 2rem; color: #b45309;">
+      <p><?= e($historyError) ?></p>
+      <p style="font-size: 0.85rem;">Run <code>php database/migrate.php</code>, or open <code>/migrate</code> as a Super Admin.</p>
+    </div>
+  <?php elseif (empty($history)): ?>
     <div class="empty" style="text-align: center; padding: 2rem; color: var(--text-muted, #64748b);">
       <p>No push notifications sent yet. Use the form above to dispatch your first push notification.</p>
     </div>

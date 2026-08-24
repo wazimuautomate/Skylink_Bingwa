@@ -1,4 +1,4 @@
--- My Bingwa remote settings (managed later from the admin panel).
+-- Skylink Bingwa remote settings (managed later from the admin panel).
 -- Import once via cPanel → phpMyAdmin → your database → Import.
 -- The app fetches these when online and CACHES them so they still work offline.
 

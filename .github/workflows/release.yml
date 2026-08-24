@@ -1,6 +1,6 @@
 name: Release (signed)
 
-# Protected, signed release build for My Bingwa.
+# Protected, signed release build for Skylink Bingwa.
 #
 # Produces the two shipping artifacts from one codebase and ONE permanent
 # signing identity:
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: my-bingwa
+        working-directory: skylink-bingwa
     # Non-secret payment config baked into the signed build. NO Daraja
     # credentials here — those stay on the payment backend (CLAUDE.md §10).
     env:
@@ -112,7 +112,7 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/my-upload-key.jks"
 
       # Build both shipping variants. build.gradle.kts reads the signing config
-      # from these env vars (KEYSTORE_PATH defaults to my-bingwa/my-upload-key.jks
+      # from these env vars (KEYSTORE_PATH defaults to skylink-bingwa/my-upload-key.jks
       # locally, but we point it at the decoded temp file here).
       - name: Build signed direct APK and Play AAB
         env:
@@ -127,11 +127,11 @@ jobs:
         run: |
           mkdir -p artifact
           cp app/build/outputs/apk/direct/release/app-direct-release.apk \
-             "artifact/My-Bingwa-v${VERSION}-direct.apk"
+             "artifact/Skylink-Bingwa-v${VERSION}-direct.apk"
           cp app/build/outputs/bundle/playRelease/app-play-release.aab \
-             "artifact/My-Bingwa-v${VERSION}-play.aab"
+             "artifact/Skylink-Bingwa-v${VERSION}-play.aab"
           cd artifact
-          sha256sum "My-Bingwa-v${VERSION}-direct.apk" > "My-Bingwa-v${VERSION}-direct.apk.sha256"
+          sha256sum "Skylink-Bingwa-v${VERSION}-direct.apk" > "Skylink-Bingwa-v${VERSION}-direct.apk.sha256"
           echo "Staged release artifacts:"
           ls -l
 
@@ -148,24 +148,24 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('v{0}', steps.version.outputs.version) }}
-          name: My Bingwa v${{ steps.version.outputs.version }}
+          name: Skylink Bingwa v${{ steps.version.outputs.version }}
           draft: false
           prerelease: false
           fail_on_unmatched_files: true
           files: |
-            my-bingwa/artifact/My-Bingwa-v${{ steps.version.outputs.version }}-direct.apk
-            my-bingwa/artifact/My-Bingwa-v${{ steps.version.outputs.version }}-direct.apk.sha256
-            my-bingwa/artifact/My-Bingwa-v${{ steps.version.outputs.version }}-play.aab
+            skylink-bingwa/artifact/Skylink-Bingwa-v${{ steps.version.outputs.version }}-direct.apk
+            skylink-bingwa/artifact/Skylink-Bingwa-v${{ steps.version.outputs.version }}-direct.apk.sha256
+            skylink-bingwa/artifact/Skylink-Bingwa-v${{ steps.version.outputs.version }}-play.aab
           body: |
-            My Bingwa v${{ steps.version.outputs.version }}
+            Skylink Bingwa v${{ steps.version.outputs.version }}
 
             Assets:
-            - `My-Bingwa-v${{ steps.version.outputs.version }}-direct.apk` — the signed
+            - `Skylink-Bingwa-v${{ steps.version.outputs.version }}-direct.apk` — the signed
               direct/sideload build. This is the file end users download and install
               from GitHub. Verify it against the accompanying `.sha256` checksum.
-            - `My-Bingwa-v${{ steps.version.outputs.version }}-direct.apk.sha256` —
+            - `Skylink-Bingwa-v${{ steps.version.outputs.version }}-direct.apk.sha256` —
               SHA-256 checksum for the direct APK.
-            - `My-Bingwa-v${{ steps.version.outputs.version }}-play.aab` — the Google
+            - `Skylink-Bingwa-v${{ steps.version.outputs.version }}-play.aab` — the Google
               Play bundle. Upload this to the Google Play Console ONLY. Do NOT
               distribute the AAB to end users; it is not directly installable.
 

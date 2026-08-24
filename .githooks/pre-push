@@ -1,5 +1,5 @@
 #!/bin/sh
-# My Bingwa push guard: refuse to push commits that add a runtime config.php.
+# Skylink Bingwa push guard: refuse to push commits that add a runtime config.php.
 # Emergency bypass (only if you are 100% certain): git push --no-verify
 z=0000000000000000000000000000000000000000
 fail=0

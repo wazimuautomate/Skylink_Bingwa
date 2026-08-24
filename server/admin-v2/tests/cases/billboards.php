@@ -100,7 +100,7 @@ test('validateTarget: internal needs a screen name', function () use ($bbCats) {
 /* ------------------------------------------------------------- url safety ----- */
 
 test('isAllowedUrl accepts a normal https address', function () {
-    ok(\App\Services\BillboardService::isAllowedUrl('https://mybingwa.co.ke/offers'));
+    ok(\App\Services\BillboardService::isAllowedUrl('https://skylinkbingwa.co.ke/offers'));
     ok(\App\Services\BillboardService::isAllowedUrl('https://sub.example.com/a/b?c=1&d=2'));
 });
 test('isAllowedUrl rejects http, javascript and data', function () {

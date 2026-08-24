@@ -1,4 +1,4 @@
-# My Bingwa — App Sync Contract (Server → Android)
+# Skylink Bingwa — App Sync Contract (Server → Android)
 
 This document is the exact contract for the versioned, read-only sync API exposed by
 **Admin V2** (`server/admin-v2`). It is the forward path for the Android app to receive
@@ -45,7 +45,7 @@ app-safe data only — never admin users, roles, drafts, audit logs or secrets.
   "schemaVersion": 1,
   "configVersion": 7,
   "publishedAt": "2026-07-25T18:20:11Z",
-  "snapshotUrl": "https://mybingwa.example/admin/api/v1/app/snapshot/7",
+  "snapshotUrl": "https://skylinkbingwa.example/admin/api/v1/app/snapshot/7",
   "checksum": "9f2c…(sha256 hex)…",
   "checksumAlgorithm": "SHA-256",
   "signature": "base64(RSA-SHA256 over the canonical snapshot bytes) or null",
@@ -84,7 +84,7 @@ verifying). Headers: `ETag`, `Cache-Control: public, max-age=31536000, immutable
     {
       "id": 3, "kind": "simple", "priority": 5, "linkedOfferId": "data_6",
       "tag": "BEST VALUE", "headline": "2GB for KSh 110", "body": "Stay connected for 24 Hrs.",
-      "ctaLabel": "Buy now", "ctaDestination": "mybingwa://offers/data_6",
+      "ctaLabel": "Buy now", "ctaDestination": "skylinkbingwa://offers/data_6",
       "imageUrl": "uploads/ab12…webp", "altText": "", "audienceRule": "all",
       "frequencyCap": 0, "startsAt": null, "endsAt": null
     }

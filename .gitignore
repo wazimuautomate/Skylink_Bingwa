@@ -1,4 +1,4 @@
-# === My Bingwa root .gitignore ===
+# === Skylink Bingwa root .gitignore ===
 # Protects build output, secrets, keystores, local machine state and IDE files
 # across the whole repository. Module-level .gitignore files also apply.
 
@@ -17,6 +17,7 @@ GoogleService-Info.plist
 service-account*.json
 play-service-account*.json
 my-bingwa-*.json
+skylink-bingwa-*.json
 *-*.json
 *.env
 .env

@@ -1,4 +1,4 @@
-# My Bingwa server — deployment
+# Skylink Bingwa server — deployment
 
 The production server is a shared cPanel host. There is no SSH pipeline, no Composer step and
 no build server: files are uploaded through File Manager and the application configures itself
@@ -41,7 +41,7 @@ pwsh server/tools/build-deploy-package.ps1
 pwsh server/tools/build-deploy-package.ps1 -Since v1.0.2
 ```
 
-The script writes `server/dist/my-bingwa-server-<timestamp>-<sha>.zip` plus a `.sha256` file.
+The script writes `server/dist/skylink-bingwa-server-<timestamp>-<sha>.zip` plus a `.sha256` file.
 Inside the ZIP:
 
 - the changed files, with the folder structure they must land in (the `server/` prefix is

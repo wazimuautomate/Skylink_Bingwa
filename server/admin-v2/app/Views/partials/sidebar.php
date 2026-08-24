@@ -19,8 +19,8 @@ $draftCount = (int) ($publishStatus['draftCount'] ?? 0);
 ?>
 <aside class="sidebar">
   <a class="brand" href="<?= e(url('/')) ?>">
-    <img class="brand__logo" src="<?= e(asset('img/logo.png')) ?>" alt="My Bingwa" width="32" height="32">
-    <span class="brand__name">My <b>Bingwa</b></span>
+    <img class="brand__logo" src="<?= e(asset('img/logo.png')) ?>" alt="Skylink Bingwa" width="32" height="32">
+    <span class="brand__name">Skylink <b>Bingwa</b></span>
   </a>
 
   <nav class="nav" aria-label="Primary">

@@ -1,6 +1,6 @@
-# My Bingwa Customer App — Plan
+# Skylink Bingwa Customer App — Plan
 
-**Product:** My Bingwa  
+**Product:** Skylink Bingwa  
 **Platform:** Native Android  
 **Status:** Pre-build product and experience specification  
 **Design direction:** Calm Momentum  
@@ -10,7 +10,7 @@
 
 ## 1. Product Definition
 
-My Bingwa is a customer-facing Android store for purchasing Bingwa data, SMS, minutes and special offers from one business.
+Skylink Bingwa is a customer-facing Android store for purchasing Bingwa data, SMS, minutes and special offers from one business.
 
 It is not:
 
@@ -49,7 +49,7 @@ The app should not chase a “crazy” experience through excessive animation, 3
 
 | Area | Decision |
 |---|---|
-| Seller | Only the My Bingwa business |
+| Seller | Only the Skylink Bingwa business |
 | Audience | Customers buying Bingwa offers |
 | Platform | Android only |
 | Accounts | No account required |
@@ -220,7 +220,7 @@ Use the Android splash screen with only the adaptive logo mark. Do not add a sec
 On first open, run a short functional onboarding:
 
 1. **Welcome**
-   - One sentence explaining that My Bingwa is for buying data, SMS, minutes and special offers.
+   - One sentence explaining that Skylink Bingwa is for buying data, SMS, minutes and special offers.
 2. **Your details**
    - Name.
    - Primary Safaricom phone number.
@@ -491,7 +491,7 @@ The final screen shows:
 - Recipient number.
 - Amount paid.
 - M-Pesa receipt when available.
-- My Bingwa order reference.
+- Skylink Bingwa order reference.
 - Time.
 - A simple message asking the customer to wait for the bundle.
 - **Buy again**
@@ -546,7 +546,7 @@ This feature is not a bundle recommendation engine. It does not inspect data usa
 
 It only uses:
 
-- Successful My Bingwa payments.
+- Successful Skylink Bingwa payments.
 - Offer purchase policy.
 - Recipient number.
 - Current day in `Africa/Nairobi`.
@@ -578,7 +578,7 @@ Before STK initiation, the backend performs an eligibility check using:
 - Offer ID.
 - Recipient number.
 - Offer policy.
-- Successful payments already recorded by My Bingwa.
+- Successful payments already recorded by Skylink Bingwa.
 
 The response returns only whether the attempted purchase is allowed, the reason and the next eligible time. It must not expose a recipient’s purchase history to an unauthenticated caller.
 
@@ -641,7 +641,7 @@ Example templates:
 
 - **No internet? You can still buy a bundle using M-Pesa.**
 - **Your favourite offers are saved and ready.**
-- **Need data today? Open My Bingwa to see your saved offers.**
+- **Need data today? Open Skylink Bingwa to see your saved offers.**
 - **Buy for another number even when you are offline.**
 
 Do not send a notification every time connectivity is lost. Android does not guarantee immediate background execution for every network change, and such alerts would become irritating. At notification time, the worker may choose an online or offline version of the template based on current connectivity.
@@ -689,7 +689,7 @@ It must not use or claim access to:
 - Other apps.
 - Browsing history.
 - Safaricom balance.
-- Purchases not recorded by My Bingwa.
+- Purchases not recorded by Skylink Bingwa.
 
 #### Personalisation model
 
@@ -729,7 +729,7 @@ This allows:
 - **{firstName}, your payment was received. Please wait for the bundle on {maskedRecipient}.**
 - **You bought {offerName} today. View other offers you can still buy.**
 - **{offerName} is available again today.**
-- **No internet? Your saved offers are still available in My Bingwa.**
+- **No internet? Your saved offers are still available in Skylink Bingwa.**
 - **One of your favourite offers is still available.**
 
 Do not place a full phone number, M-Pesa receipt or sensitive payment detail on the lock screen.
@@ -803,7 +803,7 @@ Changing the primary number:
 
 #### About
 
-- My Bingwa description.
+- Skylink Bingwa description.
 - App version name.
 - Version code where useful for support.
 - Privacy policy.
@@ -1171,7 +1171,7 @@ It returns:
 
 The endpoint must:
 
-- Check successful My Bingwa payments, not bundle-delivery status.
+- Check successful Skylink Bingwa payments, not bundle-delivery status.
 - Apply limits per recipient and offer.
 - Use server time in `Africa/Nairobi`.
 - Return eligibility only, not private purchase-history details.

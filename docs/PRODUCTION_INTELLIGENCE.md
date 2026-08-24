@@ -1,6 +1,6 @@
-# My Bingwa — Production Intelligence
+# Skylink Bingwa — Production Intelligence
 
-Architecture reference for the work delivered by `MY_BINGWA_APP_PROMPT.md`
+Architecture reference for the work delivered by `SKYLINK_BINGWA_APP_PROMPT.md`
 (Features 1–10) on branch `feature/production-intelligence`.
 
 This is the "how it actually works" companion to `Plan.md` (what the product is)
@@ -87,7 +87,7 @@ something that just happened.
 raised by a real Safaricom balance SMS. `NotificationComposer` **filters out any
 template containing `{balance}`** for every other category. So the app cannot
 state a balance it has no carrier evidence for, even if someone later adds a
-careless template. Delivery language is never used for My Bingwa's own payments;
+careless template. Delivery language is never used for Skylink Bingwa's own payments;
 "bundle received" copy is attributed to Safaricom and only fires from an SMS.
 
 If you add templates, the banned strings are asserted by
@@ -294,7 +294,7 @@ nor delays a genuine offline detection.
 Honest list of what is **not** done, so nobody assumes otherwise:
 
 - **No physical-phone acceptance test yet.** CI compiles and unit-tests; the
-  full testing matrix in `MY_BINGWA_APP_PROMPT.md` is unverified on a device.
+  full testing matrix in `SKYLINK_BINGWA_APP_PROMPT.md` is unverified on a device.
 - **`APP_RESUME` and `MANUAL_REFRESH` triggers are not wired.** The planner
   supports them; nothing calls them. `APP_RESUME` wants a `ProcessLifecycleOwner`
   observer, `MANUAL_REFRESH` a pull-to-refresh gesture.

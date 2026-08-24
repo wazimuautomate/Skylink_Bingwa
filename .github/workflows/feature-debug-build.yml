@@ -1,6 +1,6 @@
 name: Feature debug build
 
-# Clean, Android-Studio-free build of the My Bingwa debug APK.
+# Clean, Android-Studio-free build of the Skylink Bingwa debug APK.
 # Runs on feature/chore/fix/docs branches, on main, and on PRs to main.
 # Debug only: no signing secrets are used or required here.
 
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: my-bingwa
+        working-directory: skylink-bingwa
     # Non-secret payment config baked into the debug APK. The URL + app-key point
     # the app at the cPanel payment API; NO Daraja credentials are here (those stay
     # on the server). If these repo secrets are unset, both are empty and the app
@@ -86,14 +86,14 @@ jobs:
         run: |
           mkdir -p artifact
           cp app/build/outputs/apk/direct/debug/app-direct-debug.apk \
-             "artifact/My-Bingwa-Debug-${SHORT_SHA}.apk"
+             "artifact/Skylink-Bingwa-Debug-${SHORT_SHA}.apk"
 
       - name: Upload debug APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: my-bingwa-debug-${{ env.SHORT_SHA }}
-          path: my-bingwa/artifact/My-Bingwa-Debug-${{ env.SHORT_SHA }}.apk
+          name: skylink-bingwa-debug-${{ env.SHORT_SHA }}
+          path: skylink-bingwa/artifact/Skylink-Bingwa-Debug-${{ env.SHORT_SHA }}.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -106,9 +106,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: my-bingwa-reports-${{ env.SHORT_SHA }}
+          name: skylink-bingwa-reports-${{ env.SHORT_SHA }}
           path: |
-            my-bingwa/app/build/reports/**
-            my-bingwa/app/build/test-results/**
+            skylink-bingwa/app/build/reports/**
+            skylink-bingwa/app/build/test-results/**
           if-no-files-found: warn
           retention-days: 14

@@ -1,4 +1,4 @@
-/* My Bingwa Admin V2 — progressive enhancement. No framework. Runs under a strict CSP
+/* Skylink Bingwa Admin V2 — progressive enhancement. No framework. Runs under a strict CSP
    (script-src 'self'), so the theme is stamped server-side; this only toggles it. */
 (function () {
   'use strict';

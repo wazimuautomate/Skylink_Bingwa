@@ -33,7 +33,7 @@ final class Installer
             // an upgrade of an existing install need no manual migrate step.
             $mig = \App\Database\Migrator::run();
             if ($mig['error']) {
-                error_log('[mybingwa-admin] auto-migrate failed: ' . $mig['error']);
+                error_log('[skylinkbingwa-admin] auto-migrate failed: ' . $mig['error']);
                 return;
             }
             // Seed reference data, the first Super Admin and the baseline publish only on a
@@ -43,18 +43,18 @@ final class Installer
             }
             $seed = \App\Database\Seeder::run();
             if (!$seed['ok']) {
-                error_log('[mybingwa-admin] auto-install seed failed: ' . $seed['error']);
+                error_log('[skylinkbingwa-admin] auto-install seed failed: ' . $seed['error']);
                 return;
             }
             if (!empty($seed['generatedPassword'])) {
                 @file_put_contents(
                     dirname(__DIR__, 2) . '/storage/first-login-password.txt',
-                    "My Bingwa Admin — first Super Admin password (delete this file after logging in):\n"
+                    "Skylink Bingwa Admin — first Super Admin password (delete this file after logging in):\n"
                     . $seed['generatedPassword'] . "\n"
                 );
             }
         } catch (Throwable $e) {
-            error_log('[mybingwa-admin] auto-install error: ' . $e->getMessage());
+            error_log('[skylinkbingwa-admin] auto-install error: ' . $e->getMessage());
         }
     }
 }

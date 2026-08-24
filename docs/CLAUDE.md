@@ -1,6 +1,6 @@
-# My Bingwa — Claude Code Operating Instructions
+# Skylink Bingwa — Claude Code Operating Instructions
 
-This file is the operational brain for the My Bingwa repository. Read it before
+This file is the operational brain for the Skylink Bingwa repository. Read it before
 acting on every instruction.
 
 It defines how work is understood, implemented, verified, documented and
@@ -23,8 +23,8 @@ path:
 - `docs/CLAUDE_KICKOFF_AND_BUILD_PHASES.md` — execution phases and boundaries.
 - `docs/REPO_INVENTORY.md` — imported-project inventory, ownership boundaries
   and the shared contracts Phase 1 must create before parallel feature work.
-- `assets/my-bingwa-logo-kit/` — approved brand and launcher assets.
-- `my-bingwa/` — the Android app project (Gradle root; run `./gradlew` here).
+- `assets/skylink-bingwa-logo-kit/` — approved brand and launcher assets.
+- `skylink-bingwa/` — the Android app project (Gradle root; run `./gradlew` here).
 
 ---
 
@@ -57,13 +57,13 @@ Do not use `memory.md` to override a newer explicit decision in `Plan.md` or
 
 ## 2. Product definition
 
-My Bingwa is a customer-facing native Android app for buying the owner's Bingwa
+Skylink Bingwa is a customer-facing native Android app for buying the owner's Bingwa
 data, SMS, minutes and special offers.
 
 ### Locked version 1 facts
 
 - Android only.
-- One seller: the My Bingwa business.
+- One seller: the Skylink Bingwa business.
 - No customer account, password or OTP.
 - First launch collects the customer's name and primary Safaricom number.
 - Name, profile, Activity and favourites are local to the installation.
@@ -189,7 +189,7 @@ The user's PC does not have Android Studio because the machine cannot run it
 comfortably. This is a permanent workflow constraint, not a temporary missing
 tool.
 
-- Do not require Android Studio to build, inspect, sign or release My Bingwa.
+- Do not require Android Studio to build, inspect, sign or release Skylink Bingwa.
 - Do not tell the user to open an Android Studio project, Device Manager or
   Android Studio emulator.
 - Keep the repository fully buildable with the checked-in Gradle wrapper.
@@ -311,7 +311,7 @@ Version 1 must never show:
 
 ## 8. Purchase awareness
 
-Purchase awareness is based only on My Bingwa payment records, recipient and
+Purchase awareness is based only on Skylink Bingwa payment records, recipient and
 offer policy.
 
 Allowed policies:
@@ -491,13 +491,13 @@ Recommended gate:
 Artifact name:
 
 ```text
-my-bingwa-debug-<short-commit-sha>
+skylink-bingwa-debug-<short-commit-sha>
 ```
 
 The uploaded artifact must contain one clearly named APK:
 
 ```text
-My-Bingwa-Debug-<short-commit-sha>.apk
+Skylink-Bingwa-Debug-<short-commit-sha>.apk
 ```
 
 Debug artifacts are temporary testing files, not releases. Retain them for a
@@ -521,8 +521,8 @@ A tag such as `v1.0.0` or an explicitly approved manual release workflow may
 publish:
 
 ```text
-My-Bingwa-v1.0.0-direct.apk
-My-Bingwa-v1.0.0-direct.apk.sha256
+Skylink-Bingwa-v1.0.0-direct.apk
+Skylink-Bingwa-v1.0.0-direct.apk.sha256
 ```
 
 The signed direct APK belongs in that version's GitHub Release assets. The Play
@@ -533,11 +533,11 @@ material or sensitive release output unnecessarily.
 
 For a feature test:
 
-1. Open the My Bingwa repository on GitHub.
+1. Open the Skylink Bingwa repository on GitHub.
 2. Open **Actions**.
 3. Open the successful workflow run for the feature branch or commit.
 4. Find **Artifacts** in the run summary.
-5. Download `my-bingwa-debug-<short-commit-sha>`.
+5. Download `skylink-bingwa-debug-<short-commit-sha>`.
 6. Extract the downloaded archive and install the clearly named debug APK on
    the physical phone.
 
@@ -545,7 +545,7 @@ For a stable direct release:
 
 1. Open the repository's **Releases** page.
 2. Open the required version.
-3. Download the signed `My-Bingwa-v<version>-direct.apk`.
+3. Download the signed `Skylink-Bingwa-v<version>-direct.apk`.
 4. Verify its SHA-256 checksum before installation where practical.
 
 For Play testing or production, install through the configured Google Play
@@ -568,8 +568,8 @@ Never say “download the APK” without identifying its exact source and build.
 - Debug and release apps must be visually distinguishable.
 - Debug builds use an application ID suffix such as `.debug` after the permanent
   production application ID is chosen.
-- Debug app label: **My Bingwa Dev**.
-- Release app label: **My Bingwa**.
+- Debug app label: **Skylink Bingwa Dev**.
+- Release app label: **Skylink Bingwa**.
 - A debug build must not overwrite or be mistaken for the release app.
 - Debug builds never use the permanent production signing key.
 - All Play and direct release builds use the same permanent app-signing

@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Sign in · My Bingwa Admin</title>
+<title>Sign in · Skylink Bingwa Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
@@ -13,7 +13,7 @@
 <body>
 <div class="auth">
   <div class="auth__card">
-    <div class="auth__brand"><img class="brand__logo" src="<?= e(asset('img/logo.png')) ?>" alt="My Bingwa" width="32" height="32"><span class="brand__name">My <b>Bingwa</b></span></div>
+    <div class="auth__brand"><img class="brand__logo" src="<?= e(asset('img/logo.png')) ?>" alt="Skylink Bingwa" width="32" height="32"><span class="brand__name">Skylink <b>Bingwa</b></span></div>
     <h1>Admin sign in</h1>
     <p class="sub">Control centre for offers, adverts and app configuration.</p>
 

@@ -16,7 +16,7 @@ final class Crypto
     {
         $appKey = (string) Config::get('app_key', '');
         // Derive a fixed 32-byte key from the configured secret.
-        return hash('sha256', 'mybingwa-admin|' . $appKey, true);
+        return hash('sha256', 'skylinkbingwa-admin|' . $appKey, true);
     }
 
     /** Encrypt plaintext → "v1:base64(iv|tag|ciphertext)". Empty in, empty out. */

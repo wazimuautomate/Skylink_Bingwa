@@ -39,7 +39,7 @@ function test(string $name, callable $fn): void
 function ok($cond, string $msg = 'assertion failed'): void { if (!$cond) { throw new Exception($msg); } }
 function eq($a, $b, string $msg = ''): void { if ($a !== $b) { throw new Exception($msg ?: ('expected ' . var_export($b, true) . ' got ' . var_export($a, true))); } }
 
-echo "My Bingwa Admin V2 — pure logic tests\n" . str_repeat('-', 44) . "\n";
+echo "Skylink Bingwa Admin V2 — pure logic tests\n" . str_repeat('-', 44) . "\n";
 
 /* ---- canonical JSON + checksum ---- */
 test('canonical JSON sorts keys deterministically', function () {

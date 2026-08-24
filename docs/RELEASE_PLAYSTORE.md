@@ -1,6 +1,6 @@
-# My Bingwa — Release & Google Play Publishing Runbook
+# Skylink Bingwa — Release & Google Play Publishing Runbook
 
-This is the complete, ordered guide for shipping My Bingwa for the **first
+This is the complete, ordered guide for shipping Skylink Bingwa for the **first
 time**, written for someone who has never published to Google Play. Follow the
 steps top to bottom. You do **not** need Android Studio — everything is built for
 you by GitHub Actions on GitHub's servers.
@@ -15,8 +15,8 @@ you by GitHub Actions on GitHub's servers.
 
 | # | Deliverable | Exact file / source | Who gets it |
 |---|---|---|---|
-| a | **Direct v1 APK** | `My-Bingwa-v1.0.0-direct.apk` — an asset on the **GitHub Release** produced by the `release.yml` workflow | End users who sideload from GitHub |
-| b | **Play AAB** | `My-Bingwa-v1.0.0-play.aab` — an asset on the **same GitHub Release run** | **Upload to Google Play only. Never hand the AAB to end users — it is not directly installable.** |
+| a | **Direct v1 APK** | `Skylink-Bingwa-v1.0.0-direct.apk` — an asset on the **GitHub Release** produced by the `release.yml` workflow | End users who sideload from GitHub |
+| b | **Play AAB** | `Skylink-Bingwa-v1.0.0-play.aab` — an asset on the **same GitHub Release run** | **Upload to Google Play only. Never hand the AAB to end users — it is not directly installable.** |
 | c | **Signing keystore** | `my-upload-key.jks` — produced once by the `bootstrap-keystore.yml` workflow | Kept secret by you; its base64 lives in a GitHub secret so CI can sign |
 
 The direct APK and the Play AAB come out of the **same release build**, share the
@@ -31,7 +31,7 @@ correctly.
 The release build reads its signing passwords and non-secret payment config from
 **GitHub Actions secrets**. Set them at:
 
-**GitHub → your `My-Bingwa` repo → Settings → Secrets and variables → Actions →
+**GitHub → your `Skylink-Bingwa` repo → Settings → Secrets and variables → Actions →
 New repository secret.**
 
 Set these now (you will add `KEYSTORE_BASE64` in Step B, after the key exists):
@@ -60,7 +60,7 @@ gh secret set PAYMENTS_APP_KEY        # value from the payment backend
 # gh secret set KEYSTORE_BASE64 < my-upload-key.jks.b64
 ```
 
-Run `gh` from inside a clone of the repo (or add `-R wazimuautomate/My-Bingwa`).
+Run `gh` from inside a clone of the repo (or add `-R wazimuautomate/Skylink_Bingwa`).
 
 ---
 
@@ -125,24 +125,24 @@ Either way the workflow:
 
 - builds the signed **direct APK** (`:app:assembleDirectRelease`) and the
   **Play AAB** (`:app:bundlePlayRelease`),
-- names them `My-Bingwa-v1.0.0-direct.apk` and `My-Bingwa-v1.0.0-play.aab`,
-- generates `My-Bingwa-v1.0.0-direct.apk.sha256`,
-- and publishes them as assets on a **GitHub Release** named *My Bingwa v1.0.0*.
+- names them `Skylink-Bingwa-v1.0.0-direct.apk` and `Skylink-Bingwa-v1.0.0-play.aab`,
+- generates `Skylink-Bingwa-v1.0.0-direct.apk.sha256`,
+- and publishes them as assets on a **GitHub Release** named *Skylink Bingwa v1.0.0*.
 
-Download all three from **Releases → My Bingwa v1.0.0**.
+Download all three from **Releases → Skylink Bingwa v1.0.0**.
 
 ### Verify the APK checksum before trusting it
 
 ```bash
 # Compare the computed hash to the published .sha256 file:
-sha256sum -c My-Bingwa-v1.0.0-direct.apk.sha256
-# Expect: My-Bingwa-v1.0.0-direct.apk: OK
+sha256sum -c Skylink-Bingwa-v1.0.0-direct.apk.sha256
+# Expect: Skylink-Bingwa-v1.0.0-direct.apk: OK
 ```
 
-(On Windows PowerShell: `Get-FileHash My-Bingwa-v1.0.0-direct.apk -Algorithm
+(On Windows PowerShell: `Get-FileHash Skylink-Bingwa-v1.0.0-direct.apk -Algorithm
 SHA256` and compare the hash to the contents of the `.sha256` file.)
 
-Install `My-Bingwa-v1.0.0-direct.apk` on a real phone and test before you go
+Install `Skylink-Bingwa-v1.0.0-direct.apk` on a real phone and test before you go
 further. The `.aab` is **only** for Google Play (Step D).
 
 ---
@@ -159,7 +159,7 @@ further. The `.aab` is **only** for Google Play (Step D).
 ### D2. Create the app **[OWNER]**
 
 1. Play Console → **Create app**.
-2. App name: **My Bingwa**. Default language, app (not game), free.
+2. App name: **Skylink Bingwa**. Default language, app (not game), free.
 3. Package name is set by the bundle you upload — it must be **`com.bingwasokoni`**
    (the AAB already carries this; you cannot change it later).
 
@@ -206,7 +206,7 @@ match").
 
 ### D5. Store listing **[OWNER — you must supply the copy and images]**
 
-- **App title:** My Bingwa.
+- **App title:** Skylink Bingwa.
 - **Short description** and **full description:** write these (what the app is —
   buy Safaricom Bingwa data/SMS/minutes/offers, pay with M-Pesa, works offline).
   You can reuse language from `RELEASE_NOTES_v1.0.0.md`.
@@ -216,7 +216,7 @@ match").
 ### D6. Upload the AAB via Internal testing first
 
 1. Play Console → **Testing → Internal testing → Create new release**.
-2. Upload **`My-Bingwa-v1.0.0-play.aab`** (from Step C's GitHub Release).
+2. Upload **`Skylink-Bingwa-v1.0.0-play.aab`** (from Step C's GitHub Release).
 3. Add tester emails, save, review and **roll out to internal testing**.
 4. Install via the tester opt-in link on a real phone and confirm the flow.
 
@@ -233,7 +233,7 @@ before they go live.
 
 Every update must go out on **both** channels so the two stay in sync:
 
-1. **[OWNER]** Bump the version in `my-bingwa/app/build.gradle.kts`: increase
+1. **[OWNER]** Bump the version in `skylink-bingwa/app/build.gradle.kts`: increase
    **`versionCode`** (must always go up, e.g. 1 → 2) and set the new
    **`versionName`** (e.g. `1.0.1`). *(This file is owned by the app build work,
    not by this doc.)*
@@ -244,7 +244,7 @@ Every update must go out on **both** channels so the two stay in sync:
    in-app updater reads it) with the new version name, `versionCode`, the new
    APK download URL and its SHA-256. Direct-install users then get the in-app
    "update available" prompt. *(`update.json` is owned by the updater work.)*
-4. **Play channel:** upload the new `My-Bingwa-vX.Y.Z-play.aab` to a Play track
+4. **Play channel:** upload the new `Skylink-Bingwa-vX.Y.Z-play.aab` to a Play track
    (internal → production). Google auto-updates Play users.
 
 Both builds carry the same `versionCode`/`versionName` and the same signing
@@ -275,7 +275,7 @@ identity, so a user on either channel supersedes correctly.
 
 - Workflows: `.github/workflows/release.yml`, `.github/workflows/bootstrap-keystore.yml`
 - Signed build tasks: `:app:assembleDirectRelease`, `:app:bundlePlayRelease`
-- Release assets: `My-Bingwa-v1.0.0-direct.apk`, `My-Bingwa-v1.0.0-direct.apk.sha256`, `My-Bingwa-v1.0.0-play.aab`
+- Release assets: `Skylink-Bingwa-v1.0.0-direct.apk`, `Skylink-Bingwa-v1.0.0-direct.apk.sha256`, `Skylink-Bingwa-v1.0.0-play.aab`
 - Permanent identity: `applicationId = com.bingwasokoni`, `versionName 1.0.0`, `versionCode 1`, key alias `upload`
 - In-app update manifest (direct channel): `update.json` at the repo root
 - Privacy policy source: `PRIVACY.md` at the repo root

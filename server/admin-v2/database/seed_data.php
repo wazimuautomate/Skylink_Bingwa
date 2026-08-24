@@ -62,7 +62,7 @@ return [
         'min_supported_version_code' => 1,
         'mandatory' => 0,
         'play_store_url' => 'https://play.google.com/store/apps/details?id=com.bingwasokoni',
-        'apk_url' => 'https://github.com/wazimuautomate/My-Bingwa/releases',
+        'apk_url' => 'https://github.com/wazimuautomate/Skylink_Bingwa/releases',
         'apk_sha256' => '',
         'rollout_percent' => 100,
         'release_notes' => 'Initial public release.',

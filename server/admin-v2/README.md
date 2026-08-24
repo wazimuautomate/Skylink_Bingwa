@@ -1,6 +1,6 @@
-# My Bingwa Admin V2
+# Skylink Bingwa Admin V2
 
-A small, private control panel for the My Bingwa app — built for **two people** (one
+A small, private control panel for the Skylink Bingwa app — built for **two people** (one
 Super Admin, one Admin). It manages offers, billboard adverts, notifications, Safaricom
 message templates, payments (read-only), support/payment details, remote app configuration
 and update rules, with an append-only audit log and a simple **draft → publish → rollback**

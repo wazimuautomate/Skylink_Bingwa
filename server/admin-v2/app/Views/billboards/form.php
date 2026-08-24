@@ -81,7 +81,7 @@ $targetChoices = [
           <div class="field full"><label>Description</label><input type="text" name="body" value="<?= e($b['body'] ?? '') ?>" maxlength="255" data-preview-src="#pv-body" placeholder="Stay connected for {{validity}}."></div>
           <div class="field"><label>Button label</label><input type="text" name="cta_label" value="<?= e($b['cta_label'] ?? 'Buy now') ?>" maxlength="40"></div>
           <?php if ($isAdvanced): ?>
-            <div class="field"><label>Button deep link <span class="muted small">(what the app already reads)</span></label><input type="text" name="cta_destination" value="<?= e($b['cta_destination'] ?? '') ?>" maxlength="120" placeholder="mybingwa://offers/data_6"></div>
+            <div class="field"><label>Button deep link <span class="muted small">(what the app already reads)</span></label><input type="text" name="cta_destination" value="<?= e($b['cta_destination'] ?? '') ?>" maxlength="120" placeholder="skylinkbingwa://offers/data_6"></div>
           <?php endif; ?>
         </div>
       </div>

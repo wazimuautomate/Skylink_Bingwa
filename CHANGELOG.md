@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the My Bingwa customer app are documented here.
+All notable changes to the Skylink Bingwa customer app are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project aims to follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -9,6 +9,77 @@ Sections used: `Added`, `Changed`, `Fixed`, `Removed`, `Security`, `Internal`
 (`Internal` = repository change with no customer-visible effect).
 
 ## [Unreleased]
+
+## [1.0.12] - 2026-08-24
+
+### Fixed
+
+- **Admin push notifications could never be sent.** Every submit on the dashboard's
+  Instant Push page returned "Something went wrong. Please try again." `PushController`
+  had been written against methods that do not exist in this codebase, so it raised a
+  fatal `Error` before Firebase was ever contacted, and `index.php`'s catch-all rendered
+  the generic 500 page — hiding the real cause. Corrected to the actual core APIs:
+  `Csrf::check(Request)` (the form also posted `csrf_token` where `Csrf` reads `_csrf`),
+  `Validator::make()->validate([...])` with the `maxlen` rule and `firstErrors()`,
+  `Audit::log(array)`, and `Database::fetch()`/`run()` in place of the non-existent
+  `fetchOne()`/`query()`.
+- **Push notifications never appeared on a backgrounded phone.** The server sent
+  `android.notification.channel_id = "news_channel"`, but the app's channel is
+  `NotificationChannels.NEWS` = `"news"`. Android 8+ silently drops a notification posted
+  to a channel that does not exist. Messages are now data-only, so the app's own
+  `onMessageReceived` is the single delivery path in every app state — it posts through
+  `AppNotifier` on the correct channel AND records the message in the in-app
+  notification centre, which the SDK-drawn notification never did.
+- **Migration `021_fcm_push.sql` could never apply.** It carried no `-- @@` statement
+  separators (so its three statements ran as one `exec`) and its `ALTER TABLE`/`CREATE
+  INDEX` were not idempotent, while the customer API adds the same `fcm_token` column
+  itself. The migration threw, was never recorded, and `Migrator::run()` aborts on first
+  error — blocking every later migration too. Each schema change is now guarded through
+  `information_schema` and applied via `PREPARE`.
+- The dashboard reported "0 active FCM tokens" and an empty broadcast history whether or
+  not the schema existed, because both failures were swallowed. Both now say what is
+  wrong and point at the pending migrations.
+- A topic broadcast reported success while reaching nobody: FCM returns HTTP 200 for a
+  topic with zero subscribers and the app never subscribed to one. The app now
+  subscribes to `all_users` at startup, and topic delivery is counted separately from
+  per-device delivery so the numbers on the dashboard stay honest.
+
+### Added
+
+- Failed sends now surface Firebase's own reason (`SENDER_ID_MISMATCH`, a rejected
+  service account, an unreachable host) instead of a bare failure.
+- Device tokens FCM reports as `UNREGISTERED`/`NOT_FOUND` are cleared automatically, so
+  an uninstalled handset stops costing a request on every broadcast.
+
+### Changed
+
+- **The app is called "Skylink Bingwa" again**, reverting the v1.0.11 change back to the
+  name established in v1.0.9. The launcher label, top app bar, onboarding, Settings,
+  Help, Activity, the permission screen, notification channels and update messages all
+  speak the Skylink Bingwa name; the debug variant is "Skylink Bingwa Dev".
+- **The v1.0.11 logo was reverted** to the artwork that shipped in v1.0.10, across every
+  launcher, round, adaptive, monochrome, splash, onboarding and status-bar asset, plus
+  the logo kit.
+- The name is now carried through the repository structure, not just user-facing strings:
+  the Gradle module moved from `my-bingwa/` to `skylink-bingwa/`, `MyBingwaApplication`,
+  `MyBingwaFirebaseService`, `MyBingwaTopAppBar` and `MyBingwaBottomNav` were renamed to
+  their `SkylinkBingwa*` equivalents, `ic_stat_my_bingwa` became
+  `ic_stat_skylink_bingwa`, the logo kit and its assets were renamed, and the release
+  folders became `Skylink-Bingwa-v*`. CI workflows and docs follow.
+
+### Internal
+
+- `versionCode` 12 → 13 and `versionName` 1.0.11 → 1.0.12.
+- Production identities were deliberately NOT renamed, because changing them breaks a
+  live system rather than rebranding it: the `com.bingwasokoni` application ID (Play
+  update continuity), the `mybingwa.blazetechscope.com` API host, the `server/mybingwa-api`
+  cPanel directory, the `MYBINGWA_ADMIN_CONFIG` environment variable, the Firebase
+  project `my-bingwa` and its service-account key, and the `all_users` topic.
+- On-device storage keys were likewise kept: the DataStore/SharedPreferences names
+  (`mybingwa_local`, `mybingwa_notification_state`, `mybingwa_personalization`,
+  `mybingwa_sync_meta` and the rest) and the WorkManager unique names. Renaming them
+  would have made every existing install look brand new — losing the customer's profile,
+  favourites, activity history and pending order on upgrade.
 
 ## [1.0.11] - 2026-08-23
 
