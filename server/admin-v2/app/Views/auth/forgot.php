@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Account recovery · My Bingwa Admin</title>
+<title>Account recovery · Skylink Bingwa Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
@@ -12,7 +12,7 @@
 <body>
 <div class="auth">
   <div class="auth__card">
-    <div class="auth__brand"><img class="brand__logo" src="<?= e(asset('img/logo.png')) ?>" alt="My Bingwa" width="32" height="32"><span class="brand__name">My <b>Bingwa</b></span></div>
+    <div class="auth__brand"><img class="brand__logo" src="<?= e(asset('img/logo.png')) ?>" alt="Skylink Bingwa" width="32" height="32"><span class="brand__name">Skylink <b>Bingwa</b></span></div>
     <h1>Account recovery</h1>
     <p class="sub">Ask the Super Admin to set you a new password from <b>Settings → Manage partner Admin</b>.</p>
     <?php foreach (($flashes ?? []) as $f): ?>

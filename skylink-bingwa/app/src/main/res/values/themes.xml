@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Post-splash application theme. Compose owns all in-app colour; this only
+         needs to be a no-action-bar shell. -->
+    <style name="Theme.SkylinkBingwa" parent="android:Theme.DeviceDefault.NoActionBar" />
+
+    <!-- Launch theme: Android 12+ system splash centring the Skylink Bingwa mark on
+         the brand canvas (design.md §14.1). Hands off to Theme.SkylinkBingwa. -->
+    <style name="Theme.SkylinkBingwa.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.SkylinkBingwa</item>
+    </style>
+</resources>

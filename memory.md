@@ -1,4 +1,4 @@
-# My Bingwa — Project Memory
+# Skylink Bingwa — Project Memory
 
 **Purpose:** Durable project continuity and execution record  
 **Time zone:** Africa/Nairobi  

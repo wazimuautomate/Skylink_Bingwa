@@ -86,7 +86,7 @@ $config = [
     // to your fulfilment phone, so your operator loads the bundle for the right line.
     // Uses the BlazeTechScope bulk-SMS API. Leave sms_api_key empty to disable.
     'fulfilment_phone' => 'PUT_FULFILMENT_PHONE',   // your operator's phone — receives the mocked SMS
-    'business_name'    => 'MyBingwa',                // shown UPPERCASED inside the SMS body
+    'business_name'    => 'SkylinkBingwa',                // shown UPPERCASED inside the SMS body
     'sms_api_url'      => 'https://sms.blazetechscope.com/v1/bulksms',
     'sms_api_key'      => 'PUT_YOUR_SMS_API_KEY',
     'sms_sender_id'    => 'MYBINGWA',               // MUST be registered with the SMS provider

@@ -191,7 +191,7 @@ final class VersionsController extends Controller
 
     /* -------------------------------------------------------- GitHub + update.json */
 
-    private const GH_REPO = 'wazimuautomate/My-Bingwa';
+    private const GH_REPO = 'wazimuautomate/Skylink_Bingwa';
 
     /**
      * Call the public GitHub Releases API server-side and parse the latest release.
@@ -241,7 +241,7 @@ final class VersionsController extends Controller
         }
         // Fall back to a conventional release-asset path if none was listed.
         if ($apkUrl === '') {
-            $apkUrl = 'https://github.com/' . self::GH_REPO . '/releases/download/' . $tag . '/My-Bingwa-' . $tag . '-direct.apk';
+            $apkUrl = 'https://github.com/' . self::GH_REPO . '/releases/download/' . $tag . '/Skylink-Bingwa-' . $tag . '-direct.apk';
         }
 
         $sha = '';
@@ -281,7 +281,7 @@ final class VersionsController extends Controller
             CURLOPT_TIMEOUT => 10,
             CURLOPT_CONNECTTIMEOUT => 6,
             CURLOPT_HTTPHEADER => [
-                'User-Agent: My-Bingwa-Admin',
+                'User-Agent: Skylink-Bingwa-Admin',
                 'Accept: application/vnd.github+json',
                 'X-GitHub-Api-Version: 2022-11-28',
             ],

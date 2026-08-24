@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Builds the cPanel upload package for the My Bingwa server.
+    Builds the cPanel upload package for the Skylink Bingwa server.
 
 .DESCRIPTION
     Production is deployed by hand: files are dragged into cPanel File Manager over the running
@@ -80,7 +80,7 @@ if ($deleted.Count -gt 0) { Write-Host "Deleted files: $($deleted.Count) (listed
 
 # --- stage -----------------------------------------------------------------------------
 $stamp   = Get-Date -Format 'yyyyMMdd-HHmm'
-$staging = Join-Path ([System.IO.Path]::GetTempPath()) "mybingwa-deploy-$stamp"
+$staging = Join-Path ([System.IO.Path]::GetTempPath()) "skylinkbingwa-deploy-$stamp"
 if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
 New-Item -ItemType Directory -Path $staging -Force | Out-Null
 
@@ -101,7 +101,7 @@ $migrations = @($changed |
 
 # --- generated readme ------------------------------------------------------------------
 $readme = @()
-$readme += '# My Bingwa server — deployment package'
+$readme += '# Skylink Bingwa server — deployment package'
 $readme += ''
 $readme += "Built: $(Get-Date -Format 'yyyy-MM-dd HH:mm') (Africa/Nairobi machine time)"
 $readme += "Baseline: $Since"
@@ -175,7 +175,7 @@ $manifest -join "`n" | Set-Content -LiteralPath (Join-Path $staging 'DEPLOY-MANI
 
 # --- zip --------------------------------------------------------------------------------
 if (-not (Test-Path $OutDir)) { New-Item -ItemType Directory -Path $OutDir -Force | Out-Null }
-$zipPath = Join-Path $OutDir "my-bingwa-server-$stamp-$sha.zip"
+$zipPath = Join-Path $OutDir "skylink-bingwa-server-$stamp-$sha.zip"
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 
 Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $zipPath -CompressionLevel Optimal

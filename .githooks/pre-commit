@@ -1,5 +1,5 @@
 #!/bin/sh
-# My Bingwa secret/config guard.
+# Skylink Bingwa secret/config guard.
 # Refuses to commit real runtime config (config.php) or files that contain what
 # look like live secrets. Templates named *.sample.php are always allowed.
 # Emergency bypass (only if you are 100% certain): git commit --no-verify

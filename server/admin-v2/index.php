@@ -1,6 +1,6 @@
 <?php
 /**
- * My Bingwa Admin V2 — single front controller. Every request enters here (the
+ * Skylink Bingwa Admin V2 — single front controller. Every request enters here (the
  * .htaccess routes all non-asset paths to this file). Bootstraps the kernel, then
  * dispatches to a controller.
  *
@@ -173,7 +173,7 @@ try {
         Response::html('<pre style="padding:24px;font:13px/1.5 monospace;color:#b00">'
             . e($e->getMessage()) . "\n\n" . e($e->getTraceAsString()) . '</pre>', 500);
     }
-    error_log('[mybingwa-admin] ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
+    error_log('[skylinkbingwa-admin] ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
     if ($isApi) {
         Response::json(['error' => 'server_error'], 500);
     }

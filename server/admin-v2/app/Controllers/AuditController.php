@@ -83,7 +83,7 @@ final class AuditController extends Controller
         $this->guard('audit.view');
         [$where, $params] = $this->buildWhere($this->filters($request));
         $rows = Database::fetchAll('SELECT * FROM ' . $this->table() . " {$where} ORDER BY created_at DESC LIMIT 5000", $params);
-        Csv::stream('mybingwa-audit.csv',
+        Csv::stream('skylinkbingwa-audit.csv',
             ['time_utc', 'time_nairobi', 'actor', 'role', 'module', 'action', 'entity_type', 'entity_id', 'version', 'ip', 'success'],
             array_map(fn($r) => [
                 $r['created_at'], fmt_nairobi($r['created_at'], 'Y-m-d H:i'),

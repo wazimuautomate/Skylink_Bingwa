@@ -1,5 +1,5 @@
 /* =========================================================================
-   My Bingwa Admin V2 — design system.
+   Skylink Bingwa Admin V2 — design system.
    Hand-authored, pre-built (no Node/Tailwind at deploy time). Brand palette and
    typography from docs/design.md + the rebuild brief. Light / dark / system aware:
    the layout stamps <html data-theme="light|dark|system"> server-side (no FOUC, no

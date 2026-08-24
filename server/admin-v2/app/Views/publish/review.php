@@ -123,7 +123,7 @@ $canPublish = can('publish.execute');
           </div>
           <label class="rv-confirm mb">
             <input type="checkbox" name="confirm" value="yes" required <?= $hasErrors || $count === 0 ? 'disabled' : '' ?>>
-            <span>I have reviewed these <?= $count ?> change<?= $count === 1 ? '' : 's' ?> and want them sent to every My Bingwa app.</span>
+            <span>I have reviewed these <?= $count ?> change<?= $count === 1 ? '' : 's' ?> and want them sent to every Skylink Bingwa app.</span>
           </label>
           <button class="btn btn--block" type="submit" <?= $hasErrors || $count === 0 ? 'disabled' : '' ?>>
             <?= icon('publish', 18) ?> Publish v<?= $draft ?>

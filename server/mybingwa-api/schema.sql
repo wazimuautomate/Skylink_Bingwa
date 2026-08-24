@@ -1,4 +1,4 @@
--- My Bingwa payments table.
+-- Skylink Bingwa payments table.
 -- Import once via cPanel → phpMyAdmin → your database → Import (or paste in the SQL tab).
 
 CREATE TABLE IF NOT EXISTS payments (

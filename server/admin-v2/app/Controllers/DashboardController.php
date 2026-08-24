@@ -78,7 +78,7 @@ final class DashboardController extends Controller
     {
         $this->guard('dashboard.view');
         $rows = PaymentRepository::latest(500);
-        Csv::stream('mybingwa-payments-summary.csv',
+        Csv::stream('skylinkbingwa-payments-summary.csv',
             ['date', 'offer', 'amount', 'status'],
             array_map(fn($r) => [
                 // Payments carry the DATABASE clock, not UTC — see nairobiTime().

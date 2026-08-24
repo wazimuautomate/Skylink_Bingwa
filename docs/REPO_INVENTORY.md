@@ -1,4 +1,4 @@
-# My Bingwa — Repository Inventory & Coordination (Phase 0)
+# Skylink Bingwa — Repository Inventory & Coordination (Phase 0)
 
 **Purpose:** Give every later Claude session an accurate map of the imported
 project, clear ownership boundaries for parallel work, and the shared contracts
@@ -17,14 +17,14 @@ conflict.
 | Fact | Value |
 |---|---|
 | Project type | Native Android, Kotlin, Jetpack Compose + Material 3 |
-| Gradle root | `my-bingwa/` |
+| Gradle root | `skylink-bingwa/` |
 | Modules | Single `:app` module (monolithic) |
 | Gradle wrapper | **Added in Phase 0** — Gradle `9.3.1` (AGP 9.1.1 minimum), SHA-256 pinned |
 | Android Gradle Plugin | `9.1.1` |
 | Kotlin | `2.2.10` |
 | Compose BOM | `2024.09.00` |
 | `namespace` | `com.example` (placeholder — finalise in Phase 1) |
-| `applicationId` | `com.aistudio.mybingwa.k3p9zq` (AI Studio placeholder — **unresolved**, do not lock yet) |
+| `applicationId` | `com.aistudio.skylinkbingwa.k3p9zq` (AI Studio placeholder — **unresolved**, do not lock yet) |
 | `minSdk` / `targetSdk` / `compileSdk` | `24` / `36` / `36` (compile uses `release(36){ minorApiLevel = 1 }`) |
 | `versionName` / `versionCode` | `1.0` / `1` (should become semantic `1.0.0`) |
 | Debug signing | AGP auto-generated debug keystore (Phase 0 fix) |
@@ -43,7 +43,7 @@ conflict.
 
 ### Missing vs Plan.md architecture
 - ❌ Hilt (no plugin/deps) — manual `FakeBingwaRepositoryImpl()` instantiation
-- ❌ Screen-level ViewModels (`lifecycle-viewmodel-compose` present but unused; all state hoisted into one `MyBingwaApp` composable)
+- ❌ Screen-level ViewModels (`lifecycle-viewmodel-compose` present but unused; all state hoisted into one `SkylinkBingwaApp` composable)
 - ❌ Room entities/DAOs/database (data is in-memory `StateFlow`)
 - ❌ DataStore (dependency commented out; profile/theme lost on restart)
 - ❌ kotlinx.serialization (Moshi used instead)
@@ -52,7 +52,7 @@ conflict.
 
 ---
 
-## 2. Source map (`my-bingwa/app/src/main/java/com/example/`)
+## 2. Source map (`skylink-bingwa/app/src/main/java/com/example/`)
 
 ```
 MainActivity.kt                  Single activity; NavHost (string routes); owns ALL state; purchase sheet overlay
@@ -64,7 +64,7 @@ core/model/                      Plain data classes (no serialization/Room annot
   NotificationItem.kt            id, title, body, isRead, category, timestamp
   AppThemeSetting.kt             SYSTEM / LIGHT / DARK
 core/ui/                         Shared components: Buttons, Fields, OfferCard, CopyableValueBlock,
-                                 MyBingwaTopAppBar, MyBingwaBottomNav (5 items incl. Settings),
+                                 SkylinkBingwaTopAppBar, SkylinkBingwaBottomNav (5 items incl. Settings),
                                  SkeletonsAndEmpty (skeleton defined but unused)
 data/fake/
   BingwaRepository.kt            Interface for all app data/actions
@@ -185,11 +185,11 @@ Recorded so no session fakes them. See `memory.md` for the live list.
 
 ## 7. Build & CI
 
-- Local command-line build: `cd my-bingwa && ./gradlew test lint assembleDebug`
+- Local command-line build: `cd skylink-bingwa && ./gradlew test lint assembleDebug`
   (needs JDK 17+ and Android SDK; this project must never require Android Studio).
 - Authoritative build: GitHub Actions
   `.github/workflows/feature-debug-build.yml` — assembles the debug APK, uploads
-  `my-bingwa-debug-<short-sha>` containing `My-Bingwa-Debug-<short-sha>.apk`,
+  `skylink-bingwa-debug-<short-sha>` containing `Skylink-Bingwa-Debug-<short-sha>.apk`,
   then runs `test`/`lint` and uploads reports. Concurrency cancels obsolete runs.
 - Known CI risk: bleeding-edge AGP `9.1.1` + `compileSdk 36 (minorApiLevel 1)`
   require very recent SDK components on the runner; the Roborazzi screenshot test

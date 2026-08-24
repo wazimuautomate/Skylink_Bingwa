@@ -105,7 +105,7 @@ final class CustomersController extends Controller
 
         $rows = CustomerRepository::all(self::readFilters($request));
         Csv::stream(
-            'mybingwa-customers.csv',
+            'skylinkbingwa-customers.csv',
             ['name', 'phone', 'phone_international', 'joined', 'last_seen', 'app_version', 'registrations'],
             array_map(fn($c) => [
                 $c['name'],

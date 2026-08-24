@@ -180,7 +180,7 @@ final class PaymentsController extends Controller
         $rows = self::decorate($found['rows'], $offerMap);
 
         Csv::stream(
-            'mybingwa-payments.csv',
+            'skylinkbingwa-payments.csv',
             ['id', 'time_nairobi', 'payer', 'recipient', 'bought_for', 'offer', 'offer_name',
              'category', 'amount', 'status', 'receipt'],
             array_map(static fn(array $r): array => [

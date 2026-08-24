@@ -1,4 +1,4 @@
-# My Bingwa — Migration & Cutover Guide (Legacy API → Admin V2)
+# Skylink Bingwa — Migration & Cutover Guide (Legacy API → Admin V2)
 
 Admin V2 is built **beside** the existing `server/mybingwa-api`. The legacy app and its
 data are preserved and keep serving the in-testing app until you deliberately cut over.

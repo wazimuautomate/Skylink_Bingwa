@@ -1,6 +1,6 @@
-# My Bingwa
+# Skylink Bingwa
 
-Native Android customer app for buying the My Bingwa business's Bingwa data,
+Native Android customer app for buying the Skylink Bingwa business's Bingwa data,
 SMS, minutes and special offers. One seller, no customer accounts. Customers buy
 for their own number or another number, pay online via M-Pesa STK Push or follow
 cached offline Till/Paybill instructions, and track purchases locally.
@@ -19,8 +19,8 @@ status and never claims a bundle was delivered.**
 | `docs/design.md` | Canonical UI/UX: colours, typography, composition, motion, accessibility. |
 | `docs/CLAUDE_KICKOFF_AND_BUILD_PHASES.md` | Execution phases and parallel-session boundaries. |
 | `docs/REPO_INVENTORY.md` | Imported-project inventory, ownership boundaries and Phase 1 shared contracts. |
-| `assets/my-bingwa-logo-kit/` | Approved logo, launcher, notification, splash and in-app assets. |
-| `my-bingwa/` | The Android app project (Gradle root). |
+| `assets/skylink-bingwa-logo-kit/` | Approved logo, launcher, notification, splash and in-app assets. |
+| `skylink-bingwa/` | The Android app project (Gradle root). |
 
 ## Build workflow (CI-first, no Android Studio required)
 
@@ -28,11 +28,11 @@ This project is built and released **without Android Studio**. The checked-in
 Gradle wrapper and GitHub Actions are the authoritative build path; real visual
 testing happens on a physical Android phone.
 
-The Android project lives in [`my-bingwa/`](my-bingwa/). With a JDK 17+ and the
+The Android project lives in [`skylink-bingwa/`](skylink-bingwa/). With a JDK 17+ and the
 Android SDK available, you can build a debug APK from the command line:
 
 ```bash
-cd my-bingwa
+cd skylink-bingwa
 ./gradlew test lint assembleDebug
 ```
 
@@ -45,15 +45,15 @@ The clean, authoritative build runs in GitHub Actions.
 - Kotlin **2.2.10**, Jetpack Compose + Material 3
 - `minSdk 24`, `targetSdk 36`, `compileSdk 36`
 - Package/namespace: `com.example` (placeholder — to be finalised in Phase 1)
-- `applicationId`: `com.aistudio.mybingwa.k3p9zq` (placeholder — the permanent
+- `applicationId`: `com.aistudio.skylinkbingwa.k3p9zq` (placeholder — the permanent
   production applicationId is an unresolved product decision; see `memory.md`)
 
 ## Getting a debug APK
 
 1. Open the repository on GitHub and go to **Actions**.
 2. Open the successful **Feature debug build** run for your branch or commit.
-3. Download the `my-bingwa-debug-<short-sha>` artifact from the run summary.
-4. Extract it and install `My-Bingwa-Debug-<short-sha>.apk` on the phone.
+3. Download the `skylink-bingwa-debug-<short-sha>` artifact from the run summary.
+4. Extract it and install `Skylink-Bingwa-Debug-<short-sha>.apk` on the phone.
 
 Debug builds are labelled distinctly from release builds and use AGP's
 auto-generated debug signing key. Release signing, versioning and Play/direct

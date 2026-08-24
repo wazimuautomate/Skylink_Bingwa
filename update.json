@@ -1,10 +1,10 @@
 {
-  "latestVersionCode": 11,
-  "latestVersionName": "1.0.10",
+  "latestVersionCode": 13,
+  "latestVersionName": "1.0.12",
   "minSupportedVersionCode": 1,
   "updateSource": "play",
-  "apkUrl": "https://github.com/wazimuautomate/My-Bingwa/releases/download/v1.0.10/My-Bingwa-v1.0.10-direct.apk",
+  "apkUrl": "https://github.com/wazimuautomate/Skylink_Bingwa/releases/download/v1.0.12/Skylink-Bingwa-v1.0.12-direct.apk",
   "apkSha256": "",
-  "releaseNotes": "Updated 3-step streamlined onboarding, dynamic offline engagement notifications using live catalogue offers, immediate Play Store in-app updates, in-app review after successful purchase, and real-time admin push notifications via Firebase FCM HTTP v1.",
+  "releaseNotes": "The app is called Skylink Bingwa again, with the original Skylink-era logo restored. Admin push notifications now work: sending from the dashboard no longer fails, and a broadcast reaches the phone instantly and is recorded in the in-app notification centre.",
   "mandatory": false
 }

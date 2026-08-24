@@ -1,6 +1,6 @@
 <?php
 /**
- * SAMPLE configuration for My Bingwa Admin V2.
+ * SAMPLE configuration for Skylink Bingwa Admin V2.
  *
  * Copy this file to `config/config.php` ON THE SERVER and fill in the real values.
  * `config/config.php` is git-ignored and is blocked from web download by .htaccess.

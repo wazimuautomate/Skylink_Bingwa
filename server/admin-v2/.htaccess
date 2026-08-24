@@ -1,4 +1,4 @@
-# My Bingwa Admin V2 — front-controller routing. Kept maximally compatible with shared
+# Skylink Bingwa Admin V2 — front-controller routing. Kept maximally compatible with shared
 # Apache/LiteSpeed hosts (no bare Options/Require that AllowOverride might reject).
 DirectoryIndex index.php
 

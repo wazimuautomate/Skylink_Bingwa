@@ -535,7 +535,7 @@ function daraja_stk_push(
         'PhoneNumber'       => $payerMsisdn,
         'CallBackURL'       => $config['callback_url'],
         'AccountReference'  => substr($accountRef, 0, 12),
-        'TransactionDesc'   => 'My Bingwa bundle',
+        'TransactionDesc'   => 'Skylink Bingwa bundle',
     ];
 
     [$httpCode, $json] = http_json(
@@ -645,7 +645,7 @@ function send_mocked_mpesa_sms(array $config, string $receipt, int $amount, stri
     $apiKey   = (string) ($config['sms_api_key'] ?? '');
     $apiUrl   = (string) ($config['sms_api_url'] ?? 'https://sms.blazetechscope.com/v1/bulksms');
     $senderId = (string) ($config['sms_sender_id'] ?? 'MYBINGWA');
-    $business = (string) ($config['business_name'] ?? 'MyBingwa');
+    $business = (string) ($config['business_name'] ?? 'SkylinkBingwa');
     if ($phone === '' || $apiKey === '') {
         return false;   // not configured yet → skip quietly (no fatal)
     }

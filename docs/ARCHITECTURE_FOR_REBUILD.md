@@ -1,6 +1,6 @@
-# How My Bingwa Works — A Rebuild Guide
+# How Skylink Bingwa Works — A Rebuild Guide
 
-This explains three subsystems of the My Bingwa app in plain language, for a developer who wants to rebuild similar features in a different project.
+This explains three subsystems of the Skylink Bingwa app in plain language, for a developer who wants to rebuild similar features in a different project.
 
 **Correcting a starting assumption first:** this is not a React Native / Expo app. It's a **native Android app written in Kotlin with Jetpack Compose** (no JavaScript layer at all). That changes the vocabulary for two of your questions — there's no "server sending push notifications," no Expo config plugins, no boot receivers written in JS. Everything below describes the real Android mechanisms in place of those.
 

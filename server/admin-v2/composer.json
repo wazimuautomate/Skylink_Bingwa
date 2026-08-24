@@ -1,6 +1,6 @@
 {
-    "name": "mybingwa/admin-v2",
-    "description": "My Bingwa Admin V2 — offers, billboards, notifications, templates, payments, config, versioned signed sync API.",
+    "name": "skylinkbingwa/admin-v2",
+    "description": "Skylink Bingwa Admin V2 — offers, billboards, notifications, templates, payments, config, versioned signed sync API.",
     "type": "project",
     "license": "proprietary",
     "require": {

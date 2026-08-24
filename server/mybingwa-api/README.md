@@ -1,4 +1,4 @@
-# My Bingwa payment API (cPanel PHP)
+# Skylink Bingwa payment API (cPanel PHP)
 
 Four small PHP endpoints that let the app run M-Pesa STK Push **without keeping any
 Daraja secret inside the APK**. The app calls `stk.php` and polls `status.php`;
@@ -46,7 +46,7 @@ Wait a few minutes until it shows a padlock. Daraja will not call an `http://` U
 ## Step 3 — Create the database
 
 cPanel → **MySQL Databases**:
-1. Create a database, e.g. `mybingwa` (cPanel prefixes it, e.g. `user_mybingwa`).
+1. Create a database, e.g. `skylinkbingwa` (cPanel prefixes it, e.g. `user_skylinkbingwa`).
 2. Create a user + password (save them).
 3. Under **Add User To Database**, add the user with **All Privileges**.
    Write down the final DB name, user and password.

@@ -23,7 +23,7 @@ Database::boot();
 
 $apply = in_array('--apply', $argv, true);
 $mode = $apply ? 'APPLY' : 'DRY RUN';
-echo "My Bingwa legacy import — {$mode}\n";
+echo "Skylink Bingwa legacy import — {$mode}\n";
 echo str_repeat('-', 48) . "\n";
 
 function legacyExists(string $table): bool

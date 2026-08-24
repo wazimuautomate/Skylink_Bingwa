@@ -7,7 +7,7 @@
   2. Host this page at a public URL. Easiest options:
        - GitHub Pages (Settings -> Pages), or
        - the raw file URL, e.g.
-         https://raw.githubusercontent.com/wazimuautomate/My-Bingwa/main/PRIVACY.md
+         https://raw.githubusercontent.com/wazimuautomate/Skylink_Bingwa/main/PRIVACY.md
      A rendered HTML page (GitHub Pages) reads better for customers than raw
      Markdown; either is accepted by Google Play.
   3. Paste that public URL into the Google Play Console:
@@ -16,16 +16,16 @@
      publish. Do NOT commit real secrets or personal contact details.
 -->
 
-# My Bingwa — Privacy Policy
+# Skylink Bingwa — Privacy Policy
 
 **Effective date: [set on publish]**
 
-My Bingwa ("the app", "we", "us") is an Android app for buying Safaricom
+Skylink Bingwa ("the app", "we", "us") is an Android app for buying Safaricom
 "Bingwa" data, SMS, minutes and special offers from a single seller — the My
 Bingwa business. This policy explains, in plain language, what the app does and
 does not do with your information.
 
-My Bingwa has no customer accounts, no passwords and no cloud sync. The details
+Skylink Bingwa has no customer accounts, no passwords and no cloud sync. The details
 you enter stay on your own phone. We designed the app to collect as little as
 possible.
 
@@ -48,7 +48,7 @@ possible.
 
 - **Payment details for an online purchase.** When you tap Pay, the app sends
   the selected offer, the bundle recipient number and the M-Pesa payment number
-  to the My Bingwa payment server (`mybingwa.blazetechscope.com`) so it can start
+  to the Skylink Bingwa payment server (`mybingwa.blazetechscope.com`) so it can start
   the M-Pesa STK Push prompt on your phone. The actual payment is processed by
   **Safaricom M-Pesa**. Your M-Pesa PIN is entered on the Safaricom prompt, never
   in this app, and it never reaches us.
@@ -99,7 +99,7 @@ profile of you across other apps or websites.
 | **Notifications** (Android 13+) | Optional. Only requested after we explain it in the app. Used for payment updates and, if you allow them, offer reminders. You can decline and the app still works. |
 | **Phone state** | Requested only when you tap "open M-Pesa" for an offline payment, and only to pick the SIM matching the number you told us is yours so the M-Pesa menu opens on the right line. It is best-effort; if you decline, the app falls back to your default SIM. The app does not silently read or upload your phone number. |
 
-My Bingwa does not request permission to read your SMS messages, on any build.
+Skylink Bingwa does not request permission to read your SMS messages, on any build.
 
 ---
 
@@ -109,7 +109,7 @@ We share the minimum needed to process a payment you start:
 
 - **Safaricom / M-Pesa** receive the information required to run the STK Push and
   process the transaction (this is how M-Pesa payments work).
-- The **My Bingwa payment server** receives the offer, recipient number, payer
+- The **Skylink Bingwa payment server** receives the offer, recipient number, payer
   number and (for offline purchases) any receipt you enter, only to start and
   verify that payment.
 
@@ -130,7 +130,7 @@ secure payment server. They are never stored inside the app.
 - Your profile, favourites and activity live on your device for as long as the
   app is installed.
 - You can wipe them at any time using **Settings → Clear local data** in the app,
-  or from your phone's Settings → Apps → My Bingwa → Storage → Clear data.
+  or from your phone's Settings → Apps → Skylink Bingwa → Storage → Clear data.
 - **Uninstalling the app removes all of this local data.** Because there is no
   cloud account, it cannot be recovered afterwards, and reinstalling starts
   fresh.
@@ -142,7 +142,7 @@ secure payment server. They are never stored inside the app.
 
 ## 7. Children
 
-My Bingwa is intended for people old enough to hold an M-Pesa account and buy
+Skylink Bingwa is intended for people old enough to hold an M-Pesa account and buy
 mobile bundles. It is not directed at children, and we do not knowingly collect
 information from children.
 
@@ -158,7 +158,7 @@ check back from time to time.
 
 ## 9. Contact
 
-If you have questions about this policy or your data, contact My Bingwa support:
+If you have questions about this policy or your data, contact Skylink Bingwa support:
 
 - **Email:** [SUPPORT EMAIL — replace before publishing]
 - **Phone:** [SUPPORT PHONE — replace before publishing]

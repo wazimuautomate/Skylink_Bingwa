@@ -1,4 +1,4 @@
-# My Bingwa — Public Server API
+# Skylink Bingwa — Public Server API
 
 The read-only synchronisation API published by **Admin V2** (`server/admin-v2`). It is the
 only interface the Android app needs: the server publishes configuration, the app reads it
@@ -43,10 +43,10 @@ directory:
 
 ```
 https://<your-domain>/<admin-path>/
-e.g. https://mybingwa.example/admin/
+e.g. https://skylinkbingwa.example/admin/
 ```
 
-A full request URL is therefore `https://mybingwa.example/admin/api/sync/manifest`.
+A full request URL is therefore `https://skylinkbingwa.example/admin/api/sync/manifest`.
 
 Every URL the API returns (for example `resources.offers.url` in the manifest) is a
 **relative path** such as `api/sync/resource/offers`. Resolve it against the base URL the
@@ -140,7 +140,7 @@ Liveness plus a summary of the current published release. Safe to call from a mo
 
 ```http
 GET /admin/api/health HTTP/1.1
-Host: mybingwa.example
+Host: skylinkbingwa.example
 ```
 
 **Example response — 200**
@@ -193,7 +193,7 @@ signed. This is the original contract and it does not change.
 
 ```http
 GET /admin/api/app-data HTTP/1.1
-Host: mybingwa.example
+Host: skylinkbingwa.example
 If-None-Match: "9f2c8a1e...b7"
 ```
 
@@ -247,7 +247,7 @@ resource in it, so the device can decide what (if anything) to download.
 
 ```http
 GET /admin/api/sync/manifest?since=11 HTTP/1.1
-Host: mybingwa.example
+Host: skylinkbingwa.example
 X-Install-Id: 7f3a1c0b9d2e4f6a
 ```
 
@@ -322,7 +322,7 @@ served here.
 
 ```http
 GET /admin/api/sync/resource/smsRules HTTP/1.1
-Host: mybingwa.example
+Host: skylinkbingwa.example
 If-None-Match: "8d55c3a1..."
 ```
 
@@ -410,7 +410,7 @@ still served. Duplicates are collapsed. Key names are sanitised before they are 
 
 ```http
 GET /admin/api/sync/resources?keys=offers,smsRules,wallet HTTP/1.1
-Host: mybingwa.example
+Host: skylinkbingwa.example
 ```
 
 **Example response — 200**

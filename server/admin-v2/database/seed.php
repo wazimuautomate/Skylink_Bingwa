@@ -173,7 +173,7 @@ final class Seeder
         }
         $boot = Config::get('bootstrap_admin', []);
         $name = (string) ($boot['name'] ?? 'Owner');
-        $email = strtolower((string) ($boot['email'] ?? 'owner@mybingwa.local'));
+        $email = strtolower((string) ($boot['email'] ?? 'owner@skylinkbingwa.local'));
         $password = (string) ($boot['password'] ?? '');
         $generated = null;
         if ($password === '' || strlen($password) < 10) {

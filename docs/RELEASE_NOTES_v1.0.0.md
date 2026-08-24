@@ -1,8 +1,8 @@
-# My Bingwa v1.0.0 — Release notes
+# Skylink Bingwa v1.0.0 — Release notes
 
-Welcome to My Bingwa, the simplest way to buy Safaricom Bingwa bundles.
+Welcome to Skylink Bingwa, the simplest way to buy Safaricom Bingwa bundles.
 
-My Bingwa lets you find and pay for **data, SMS, minutes and special offers** in
+Skylink Bingwa lets you find and pay for **data, SMS, minutes and special offers** in
 just a few taps — for your own line or for someone else's.
 
 ## What you can do
@@ -32,4 +32,4 @@ just a few taps — for your own line or for someone else's.
 - The app confirms your **payment**. Your bundle is delivered separately — after
   payment, just wait for it to arrive on the number you chose.
 
-This is our first release. Thank you for using My Bingwa.
+This is our first release. Thank you for using Skylink Bingwa.
