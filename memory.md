@@ -1677,3 +1677,67 @@ destinations.
   - Upload `Skylink-Bingwa-v1.0.12-play.aab` to the Play Console.
   - Repo renamed to `wazimuautomate/Skylink_Bingwa`; the remote and all in-repo URLs
     point at the new name.
+
+---
+
+## 2026-08-24 — v1.0.13: v1.0.12 shipped with a fake Firebase project; fixed and re-released
+
+- **Symptom:** user sent a push from the admin dashboard and got "Push sent to the
+  all_users topic. No device has registered its token yet, so the exact number of phones
+  reached is not known." No notification arrived on their test phone.
+
+- **Root cause:** the `GOOGLE_SERVICES_JSON` repository secret had never been set.
+  `ensureGoogleServicesJson` in `app/build.gradle.kts` falls back to writing a fake stub
+  Firebase project (`fake_api_key_for_ci_build`, project id `skylink-bingwa`) whenever the
+  real config file is absent — which it always is on a fresh CI checkout, since
+  `google-services.json` is gitignored. Confirmed by unzipping the released v1.0.12 APK
+  (`aapt2 dump resources`) and finding the fake key and project id baked into
+  `resources.arsc`. FCM cannot issue a token against a project that does not exist, so no
+  device could ever register, and the server's topic broadcast reached nobody. **This gap
+  predates the push-notification code work** (the `ensureGoogleServicesJson` task and its
+  stub fallback already existed) and was missed because build/CI success was verified but
+  the shipped binary's actual Firebase wiring never was.
+
+- **Fix:** set the `GOOGLE_SERVICES_JSON` GitHub Actions secret to the real
+  `skylink-bingwa/app/google-services.json` on disk — `project_id: my-bingwa`,
+  matching the FCM service-account key (`my-bingwa-b538e0f6c645.json`) already deployed
+  on the server, covering both `com.bingwasokoni` and its debug variant. This was a
+  destructive/sensitive-adjacent action (writing a secret to a shared system) that the
+  harness gated; proceeded only after the user explicitly said to.
+
+- **Re-released as v1.0.13** (versionCode 14) rather than reusing v1.0.12: the tag had
+  already been pushed and the release already downloaded/installed by the user, so
+  reusing it would be confusing. v1.0.12's GitHub Release was marked broken + pre-release
+  (not deleted, since the user had already installed it) and points at v1.0.13.
+
+- **Verification, this time actually checking the shipped binary, not just the build log:**
+  - `apksigner verify --print-certs` on the v1.0.13 APK: `185d3fca…37cd`,
+    `C=KE, L=Nairobi, O=My Bingwa` — **identical to v1.0.9**, confirming update continuity.
+  - `aapt2 dump resources` on the v1.0.13 APK:
+    `google_app_id = 1:111803005684:android:b538e0f6c6456235d7e7b7`,
+    `google_storage_bucket = my-bingwa.firebasestorage.app` — both match the real project,
+    confirmed NOT the fake stub this time.
+  - CI **Feature debug build** (commit `d587527`) — **SUCCESS**.
+  - CI **Release (signed)** run `32710909917` from tag `v1.0.13` — **SUCCESS**.
+
+- **Known caveat, not yet resolved:** the real `google-services.json`'s `api_key` is the
+  literal placeholder `AIzaSyDummyKeyForGoogleServicesCompilationOnly`, not a live Google
+  API key — this is what's in the source file itself. FCM token registration goes through
+  Play Services via the App ID rather than that REST key, so it should not block push, but
+  flagged in the v1.0.13 release README as the next thing to check if push still fails: a
+  real Android API key may need generating in Google Cloud Console for the `my-bingwa`
+  Firebase project.
+
+- **Lesson for future release verification on this project:** "CI green" and "compiles"
+  are not sufficient to declare a release working when the build has an env-dependent
+  fallback (a missing secret, a stubbed config). Unzip/inspect the actual published
+  artifact for the specific thing being fixed before calling it done — `apksigner
+  verify` for signing identity, `aapt2 dump resources` for baked-in config values like
+  this one.
+
+- **Next:**
+  - Reinstall/update the test phone to v1.0.13 (updates cleanly over v1.0.12, no
+    onboarding redo needed) and resend the push.
+  - No server re-upload needed for v1.0.13 — only the Android client's Firebase wiring
+    changed; the server-side push fix already shipped with v1.0.12.
+  - Upload `Skylink-Bingwa-v1.0.13-play.aab` to the Play Console.
