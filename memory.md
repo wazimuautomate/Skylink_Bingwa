@@ -1590,3 +1590,90 @@ destinations.
   - Place `my-bingwa-b538e0f6c645.json` outside web root on cPanel and set path in `config.php`.
   - Upload `My-Bingwa-v1.0.10-play.aab` to Google Play Console.
 
+
+---
+
+## 2026-08-24 — v1.0.12: admin push notifications fixed; Skylink Bingwa name and logo restored
+
+- **Context:** Two prompts had been issued against this repo. The first — reverting the
+  app to the name "My Bingwa" with new artwork — was **not** intended for this project but
+  had already been executed in full as `dde846e` (v1.0.11). The second — fixing admin push
+  notifications — was **never implemented**. This execution undoes the first and delivers
+  the second.
+
+- **Root cause of "Something went wrong. Please try again." on the Instant Push page.**
+  Not Firebase. Three independent faults:
+  1. `PushController` called methods that do not exist in this codebase —
+     `Csrf::check(string)` (the real signature takes a `Request`), `$v->rule()`,
+     `$v->firstError()`, `Audit::log(named:)`, `Database::fetchOne()`, `Database::query()`.
+     Each raised a fatal `Error` before FCM was contacted; `index.php`'s `catch (Throwable)`
+     rendered the generic 500 page, hiding the cause. The form also posted `csrf_token`
+     while `Csrf` reads `_csrf`.
+  2. The server sent `android.notification.channel_id = "news_channel"` but the app's
+     channel is `NotificationChannels.NEWS` = `"news"`. Android 8+ silently discards a
+     notification posted to a channel that does not exist, so every background push
+     vanished with no error anywhere. Messages are now **data-only**, making
+     `onMessageReceived` the single delivery path in all app states — the tray notification
+     is posted by `AppNotifier` on the right channel AND recorded in the in-app
+     notification centre, which the SDK-drawn notification never was.
+  3. `021_fcm_push.sql` could never apply: no `-- @@` separators, and non-idempotent
+     `ALTER TABLE`/`CREATE INDEX` even though `register_user.php` adds the same `fcm_token`
+     column itself. It threw, was never recorded, and `Migrator::run()` aborts on first
+     error — silently blocking every later migration too. Now guarded via
+     `information_schema` + `PREPARE`.
+
+- **Also fixed:** failures report Firebase's own reason instead of a bare `false`;
+  `UNREGISTERED`/`NOT_FOUND` tokens are pruned; the app subscribes to the `all_users`
+  topic (the server's topic fan-out previously returned HTTP 200 and reached nobody);
+  topic delivery is counted separately from per-device delivery so the dashboard cannot
+  claim a delivery count it does not have; the page reports a missing schema instead of
+  showing a confident "0 tokens".
+
+- **Branding:** name reverted to **Skylink Bingwa** (v1.0.9's name) and the v1.0.11 logo
+  reverted to the v1.0.10 artwork across every asset. Carried through the repo: module
+  `my-bingwa/` → `skylink-bingwa/`, the `MyBingwa*` classes → `SkylinkBingwa*`,
+  `ic_stat_my_bingwa` → `ic_stat_skylink_bingwa`, the logo kit, and every `release/` folder
+  plus the artifact filenames and checksum contents.
+
+- **Deliberately NOT renamed** (renaming breaks a live system rather than rebranding it):
+  `com.bingwasokoni`; `mybingwa.blazetechscope.com`; `server/mybingwa-api/`;
+  `MYBINGWA_ADMIN_CONFIG`; Firebase project `my-bingwa` and its service-account key; the
+  `all_users` topic; the signing identity DN (`O=My Bingwa`); **all on-device storage keys**
+  (`mybingwa_local`, `mybingwa_notification_state`, `mybingwa_notification_templates`,
+  `mybingwa_remote_notifications`, `mybingwa_personalization`, `mybingwa_sync_meta`,
+  `mybingwa_remote_config`, `mybingwa_engagement*`) and the WorkManager unique names. An
+  automated sweep had renamed those storage keys; it was caught and reverted before
+  building — shipping it would have made every existing install look brand new, losing the
+  customer's profile, favourites, activity history and pending order.
+
+- **Also caught and reverted:** the sweep rewrote historical `CHANGELOG.md`/`memory.md`
+  entries, making the v1.0.11 entry claim it restored the name *to* "Skylink Bingwa" — the
+  opposite of what it did. History is preserved verbatim; only the new 1.0.12 entry was added.
+
+- **Incidental fix:** `ensureGoogleServicesJson` read a top-level script `val` inside
+  `doLast`. In a `.gradle.kts` a top-level `val` compiles to a property of the script class,
+  so the action captured the script object — which Gradle 9's configuration cache refuses
+  to serialise, failing every local build. Values are now captured as locals of the
+  configure lambda.
+
+- **Verification:**
+  - `./gradlew :app:compileDirectReleaseKotlin` — **SUCCESS** (0 errors)
+  - CI **Server checks** — **SUCCESS**: PHP syntax on every file, `php tests/run.php`,
+    migration well-formedness, committed-secret scan
+  - CI **Feature debug build** — **SUCCESS**: Android unit tests + lint
+  - CI **Release (signed)** run `32705920591` from tag `v1.0.12` — **SUCCESS**
+  - Signer verified with `apksigner`: `185d3fca…37cd` (`C=KE, L=Nairobi, O=My Bingwa`),
+    **identical to v1.0.9**, so updates supersede correctly.
+  - Merged to `main` as `71c7013` and pushed.
+
+- **Discovered:** the APK/AAB in `release/Skylink-Bingwa-v1.0.10/` and `v1.0.11/` are signed
+  with the local **Android debug key** (`3d94a46c…0291`, `CN=Android Debug`), not the
+  production identity — they were built locally, not by CI, and could never have been
+  uploaded to Play or installed over a real install. Only v1.0.9 and v1.0.12 are properly signed.
+
+- **Next:**
+  - Upload the four push-fix files to cPanel and run the pending migrations (see
+    `release/Skylink-Bingwa-v1.0.12/README.md` → POST-INSTRUCTIONS).
+  - Upload `Skylink-Bingwa-v1.0.12-play.aab` to the Play Console.
+  - Repo renamed to `wazimuautomate/Skylink_Bingwa`; the remote and all in-repo URLs
+    point at the new name.

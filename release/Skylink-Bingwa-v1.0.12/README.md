@@ -2,14 +2,20 @@
 
 **versionName** `1.0.12` · **versionCode** `13` · **applicationId** `com.bingwasokoni`
 
-> ⚠️ **The artifacts in this folder are DEBUG-SIGNED and must not be published.**
-> No release keystore exists on the build machine — it lives only in the CI secrets
-> (`KEYSTORE_PATH` / `STORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD`), and
-> `app/build.gradle.kts` falls back to the debug signing identity when the keystore is
-> absent. A debug-signed build **cannot** be uploaded to Play and **cannot** update an
-> existing install. Use these only to verify the changes on a test handset.
-> **The publishable v1.0.12 must come from the `release.yml` CI workflow.** See
-> "Producing the signed release" below.
+**Signed with the permanent production identity** — built by the `release.yml` CI
+workflow from tag `v1.0.12` (run 32705920591) and published to the GitHub Release.
+
+Signer certificate SHA-256 `185d3fca540acfcf26ff49530bdb5ff491a236e8fa096493ccd86f72117837cd`
+(`C=KE, L=Nairobi, O=My Bingwa, CN=My Bingwa`) — verified identical to the v1.0.9
+release, so this build updates existing installs correctly on both channels.
+
+> ⚠️ **Note on v1.0.10 and v1.0.11.** The APK/AAB sitting in those two release folders are
+> signed with the local **Android debug key**
+> (`3d94a46c5d74324df89831ae75f8ef338b7ed7530dacd7a1fe69221c78f80291`,
+> `CN=Android Debug`), not the production identity. They were produced by a local Gradle
+> build rather than by CI, so they could never have been uploaded to Play or installed as
+> an update over a real install. Only v1.0.9 and this v1.0.12 carry the real signature.
+> Rebuild those tags through `release.yml` if you ever need publishable copies.
 
 ## What changed in v1.0.12
 
@@ -88,17 +94,19 @@ Changing any of these breaks a live system rather than rebranding it:
 | `Skylink-Bingwa-v1.0.12-direct.apk` | Direct APK — **debug-signed, do not distribute** | Sideload onto a test phone |
 | `*.sha256` | Checksums of the files as built | Integrity check |
 
-## Producing the signed release
+## How this was built
 
-The signed, publishable build comes from CI, which holds the keystore:
+Tag `v1.0.12` was pushed to `main`, which triggered `.github/workflows/release.yml`. That
+job decodes the keystore from repository secrets into `$RUNNER_TEMP`, builds
+`:app:assembleDirectRelease` and `:app:bundlePlayRelease`, deletes the keystore in an
+always()-run cleanup step, and publishes the assets to the GitHub Release. The files in
+this folder were downloaded from that release with `gh release download v1.0.12`.
 
-1. Push this branch to GitHub.
-2. Run the **release** workflow (`.github/workflows/release.yml`) — it builds
-   `:app:assembleDirectRelease :app:bundlePlayRelease` with the release keystore injected
-   from secrets and publishes `Skylink-Bingwa-v1.0.12-direct.apk`,
-   its `.sha256`, and `Skylink-Bingwa-v1.0.12-play.aab`.
-3. Replace the debug-signed files in this folder with the CI artifacts before publishing.
-4. Upload the `.aab` to Play Console.
+Gates that passed before the merge to `main`:
+
+- **Server checks** — PHP syntax on every file, admin logic tests (`php tests/run.php`),
+  migration well-formedness, committed-secret scan.
+- **Feature debug build** — Android unit tests and lint.
 
 ---
 
