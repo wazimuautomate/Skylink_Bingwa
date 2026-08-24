@@ -749,8 +749,10 @@ fun SkylinkBingwaApp(
     // happened — and waits for the purchase sheet to be closed so the card is never
     // stacked on top of a modal.
     //
-    // ReviewPolicy decides IF: two received purchases and at most once every 60
-    // days. Google quotas the card too, but invisibly — the API never reports
+    // ReviewPolicy decides IF: at least one received purchase and at most once every
+    // 30 days (ReviewPolicy.MIN_SUCCESSFUL_PURCHASES / MIN_DAYS_BETWEEN_PROMPTS — the
+    // source of truth; keep this comment in sync with it). Google quotas the card
+    // too, but invisibly — the API never reports
     // whether it appeared — so the attempt is recorded either way rather than
     // re-asking on the assumption it did not show.
     val lastReviewPrompt by repository.lastReviewPromptMillis.collectAsState()
