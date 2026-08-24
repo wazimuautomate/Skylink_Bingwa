@@ -1741,3 +1741,64 @@ destinations.
   - No server re-upload needed for v1.0.13 — only the Android client's Firebase wiring
     changed; the server-side push fix already shipped with v1.0.12.
   - Upload `Skylink-Bingwa-v1.0.13-play.aab` to the Play Console.
+
+---
+
+## 2026-08-24 — v1.0.14: real Firebase config still wasn't enough — FCM token race on cold start
+
+- **Symptom:** after v1.0.13 (real Firebase project confirmed baked into the APK via
+  `aapt2 dump resources`, signing confirmed identical to v1.0.9), sending a push STILL
+  returned "No device has registered its token yet" on the user's real test phone.
+
+- **Root cause, found by re-reading `FakeBingwaRepositoryImpl.kt` side by side:**
+  `setFcmToken()` reads `_userProfile.value` to check `isOnboardingCompleted`, but does
+  NOT await `restoreComplete` first — unlike its sibling `registerCustomer()` a few lines
+  below, which explicitly does, with a comment documenting exactly this race
+  ("Never race the restore..."). On a fresh install this rarely matters, since onboarding
+  runs interactively and the in-memory profile is already correct once a token arrives.
+  But for an ALREADY-ONBOARDED install (the test phone; every real customer updating from
+  an earlier version), `registerCustomer()` short-circuits on `_customerRegistered` and
+  never runs again — making `setFcmToken()` the ONLY remaining path that can ever deliver
+  a token to the server. `FirebaseMessaging`'s token callback can resolve before the
+  on-disk DataStore restore finishes on a cold start (a network round-trip racing a local
+  disk read); when it wins, `setFcmToken()` reads the DEFAULT `isOnboardingCompleted =
+  false` and silently drops the token, launch after launch, with nothing logged anywhere.
+
+- **Fix:** added `restoreComplete.await()` to `setFcmToken()`, matching
+  `registerCustomer()`'s already-correct, already-documented pattern exactly. One-line
+  fix once found; the hard part was that nothing about this failure mode is visible from
+  server logs, the admin dashboard, or a build/CI check — it only shows up as "device
+  never registers," indistinguishable from a dozen other causes without reading the
+  client race condition directly.
+
+- **Verification, same rigor as v1.0.13** (inspecting the actual shipped binary, not
+  just the build log):
+  - `./gradlew :app:compileDirectDebugKotlin` — SUCCESS, no new warnings.
+  - CI Feature debug build (commit `16b5075`) — SUCCESS.
+  - CI Release (signed) run `32714571455` from tag `v1.0.14` — SUCCESS.
+  - `apksigner verify`: `185d3fca…37cd` — identical to v1.0.9/v1.0.13.
+  - `aapt2 dump resources`: real `google_app_id`/`google_storage_bucket` still correctly
+    present (this release touched no Firebase config, only app logic).
+  - v1.0.12 and v1.0.13 GitHub Releases both marked broken/superseded/prerelease,
+    pointing forward, rather than deleted (both had already been installed for testing).
+
+- **Pattern worth remembering for this project:** three release attempts in one day each
+  failed for a DIFFERENT reason at a DIFFERENT layer — a fatal PHP error masked by a
+  generic 500 (server), a missing CI secret producing a fake Firebase project (build
+  pipeline), and an unguarded async read racing a disk load (client). None of these were
+  visible from "it compiles" or "CI is green." The only way any of them surfaced was
+  either unzipping/inspecting the actual shipped artifact, or the user actually testing
+  on a real device and reporting the exact symptom back. Don't declare a release "done"
+  on green CI alone when there's a runtime integration this deep (an external push
+  service, a config baked in at build time, a cold-start ordering).
+
+- **Still unverified (same caveat as v1.0.13):** the real `google-services.json`'s
+  `api_key` is the placeholder `AIzaSyDummyKeyForGoogleServicesCompilationOnly`. If push
+  still fails after v1.0.14 on a real device, this — and whether the admin Customers page
+  shows the test phone's number at all (isolating "FCM specifically" from "the whole
+  registration pipeline") — are the next things to check.
+
+- **Next:**
+  - User to install v1.0.14 (updates cleanly over v1.0.13) and resend the push.
+  - No server or Firebase-config re-upload needed — only `FakeBingwaRepositoryImpl.kt`
+    changed in this release.
