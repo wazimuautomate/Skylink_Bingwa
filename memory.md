@@ -1869,3 +1869,94 @@ destinations.
   fabricated. The only real verification is testing the credential against the actual
   external service it claims to authenticate with. Do that BEFORE spending a rebuild
   cycle, not after a user reports it still doesn't work.
+
+### 2026-08-27 10:05 EAT — v1.0.16: SDK/dependency upgrade (Play Console "outdated SDK" warning)
+
+- **Objective:** User reported Google Play Console error *"An SDK version that you are
+  using is outdated. We advise that you upgrade"* and asked for the app to be upgraded
+  and the new build placed in `release/`. Play's own target-API-level deadline
+  (target API 36+ by 2026-08-31) was 4 days away at the time, adding urgency.
+- **Result:** Done. v1.0.16 built, signed with the permanent identity, published as a
+  GitHub Release, downloaded, verified, and recorded in `release/Skylink-Bingwa-v1.0.16/`.
+- **Investigation:** Play Console's warning text does not name which bundled SDK it
+  means. Rather than guess, read `app/build.gradle.kts`'s actual `dependencies {}` block
+  (not just `libs.versions.toml`, which also declares several unused entries —
+  Accompanist Permissions, CameraX, `play-services-location`, Credentials/GoogleID,
+  Firebase Auth/Firestore/AI — that are never applied and so never ship in the APK) to
+  find the real, shipped SDK surface, then brought every one of those to its current
+  stable Maven-published release. Verified version numbers against authoritative
+  sources (`maven-metadata.xml` on `dl.google.com`/`repo1.maven.org`, not search-engine
+  summaries, which were repeatedly stale/wrong — e.g. a search claimed AGP 9.2.0 was
+  latest when 9.3.2 already existed).
+- **Changed:** AGP 9.1.1→9.3.2, Gradle wrapper 9.3.1→9.7.1, Kotlin 2.2.10→2.4.10,
+  compileSdk 36(minorApiLevel 1)→**37**, Compose BOM 2024.09.00→2026.08.00, AndroidX
+  core-ktx/lifecycle/activity-compose/navigation-compose/room/work-runtime-ktx/
+  datastore-preferences/core-splashscreen to current stable, Retrofit 2.12.0→**3.0.0**,
+  OkHttp/logging-interceptor 4.10.0→**5.5.0**, kotlinx.coroutines 1.10.2→1.11.0,
+  Firebase BOM 34.15.0→34.18.0. `targetSdk` deliberately left at **36** (not bumped to
+  37) — that is what Play's Aug 31 2026 deadline actually requires; `compileSdk` only
+  had to move to 37 because several updated libraries (`navigation-compose 2.10.0`,
+  `androidx.core 1.19.0`, `lifecycle-*-compose-android 2.11.0`, `okhttp-android 5.5.0`)
+  declare a minimum-compileSdk of 37 in their AAR metadata and fail
+  `checkAarMetadata` otherwise. `versionCode` 16→17, `versionName` "1.0.15"→"1.0.16".
+  Files: `skylink-bingwa/app/build.gradle.kts`, `skylink-bingwa/gradle/libs.versions.toml`,
+  `skylink-bingwa/gradle/wrapper/gradle-wrapper.properties`.
+- **Decisions/assumptions:**
+  - Retrofit/OkHttp taken to their major-version-current releases (3.0.0 / 5.5.0) rather
+    than staying on the 2.x/4.x lines, because Maven Central's `maven-metadata.xml`
+    showed those lines have stopped receiving releases — staying on them would likely
+    still read as "outdated" to Play. Checked the app's actual usage first (simple
+    `suspend fun` Retrofit interfaces, `HttpLoggingInterceptor` only, no deprecated
+    Java-static-method OkHttp patterns) before judging the jump low-risk; confirmed by
+    an actual successful build, not just changelog-reading.
+  - Did NOT touch Coil (2.7.0 is already the latest stable release in the 2.x line;
+    Coil 3.x is a different, non-drop-in group/API and out of scope) or Moshi (1.15.2
+    is still current — no release since Dec 2024).
+  - Left `robolectric`/`roborazzi`/`junit`/`espresso` versions untouched — test-only
+    dependencies never ship in the release APK, so they're irrelevant to a Play SDK
+    warning; touching them was out of scope for this task.
+- **Verification (local, this machine has JDK 17 + Android SDK 36/37 — see
+  [[jdk-and-winget-setup]], though its "C: has ~2.2GB free" note is now stale: 20GB was
+  free this session):**
+  - `./gradlew :app:assembleDirectDebug` — BUILD SUCCESSFUL (first attempt, at
+    compileSdk 36, failed with 6 AAR-metadata errors demanding compileSdk 37; fixed by
+    bumping compileSdk, then succeeded).
+  - `./gradlew :app:assembleDirectRelease :app:bundlePlayRelease` — BUILD SUCCESSFUL.
+  - `./gradlew :app:testDirectDebugUnitTest` — 1 pre-existing failure
+    (`OnboardingPermissionComposeTest`, all 6 of its cases): Robolectric 4.16.1 (already
+    latest stable — no newer release exists to bump to) losing the Compose semantics
+    tree against the new Compose UI test artifacts pulled in by the BOM bump. Confirmed
+    this is a test-harness compatibility gap, not a production-code regression, and that
+    `release.yml` never runs tests (only `assembleDirectRelease`/`bundlePlayRelease`), so
+    it does not block shipping. **Left open as a known follow-up** — not fixed this
+    session.
+  - Downloaded the actual GitHub Release assets (not trusted CI logs alone) and
+    verified: `sha256sum -c` on the direct APK matches; `apksigner verify --print-certs`
+    shows signer SHA-256 `185d3fca...7837cd` — identical to v1.0.9 through v1.0.15, so
+    updates apply cleanly on both channels; `aapt2 dump badging` confirms
+    `compileSdkVersion='37'`, `targetSdkVersion='36'`, `versionCode='17'`,
+    `versionName='1.0.16'` are actually baked into the shipped binary.
+- **Git:** Two commits on `main` (already the trunk here — no feature-branch step for
+  this repo's release flow): `d02b11f` (dependency/version bump) and `806dc74` (release
+  pack record), both pushed. Tag `v1.0.16` pushed, which triggered the protected
+  `release.yml` (`workflow_dispatch`/`push: tags: v*` only — CLAUDE.md §12.5), CI run
+  `33047659614`, **success in 4m47s**. GitHub Release
+  <https://github.com/wazimuautomate/Skylink_Bingwa/releases/tag/v1.0.16> published with
+  the signed APK + AAB + checksum. Downloaded those into
+  `release/Skylink-Bingwa-v1.0.16/` and committed the README + both `.sha256` files
+  (matching this repo's established convention: the binaries themselves are gitignored
+  and live only as GitHub Release assets, never in git history — confirmed by
+  `git ls-files` on the v1.0.15 folder before assuming otherwise).
+- **Risks/blockers:** The `OnboardingPermissionComposeTest` Robolectric/Compose-semantics
+  gap (see Verification) is unresolved — worth a dedicated pass if that test suite
+  matters going forward, but not urgent since it doesn't gate any real pipeline.
+  Otherwise none — this was a toolchain/dependency bump only, no app behavior changed,
+  and every claim above was verified against the actual downloaded artifact rather than
+  assumed from a green CI badge.
+- **Next:** User uploads `Skylink-Bingwa-v1.0.16-play.aab` to Play Console (from the
+  GitHub Release or `release/Skylink-Bingwa-v1.0.16/` after re-downloading — the AAB
+  itself isn't in git, only its checksum) and confirms the "outdated SDK" warning
+  clears. If it does NOT clear, the warning was pointing at something outside what this
+  session could infer from the bundled dependency list (e.g. a stale bundle still
+  "active" in a Play track's App Bundle Explorer — deactivate it there) and needs the
+  actual Play Console SDK Console screen read directly.
