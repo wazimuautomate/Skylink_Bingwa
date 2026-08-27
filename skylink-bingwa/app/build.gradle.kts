@@ -7,7 +7,7 @@ plugins {
 
 android {
   namespace = "com.example"
-  compileSdk { version = release(36) { minorApiLevel = 1 } }
+  compileSdk = 37
 
   defaultConfig {
     // Permanent production application ID (Play + direct). This is the app's
@@ -24,8 +24,8 @@ android {
     // GitHub and Play channels and updates supersede correctly (same signing
     // identity — see signingConfigs + docs/RELEASE_PLAYSTORE.md). Bump BOTH for
     // every release; versionCode must only ever increase.
-    versionCode = 16
-    versionName = "1.0.15"
+    versionCode = 17
+    versionName = "1.0.16"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
