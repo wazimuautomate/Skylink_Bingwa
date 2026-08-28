@@ -16,7 +16,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Redeem
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.WifiOff
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,9 +42,11 @@ fun SkylinkBingwaTopAppBar(
     userName: String = "Bonke",
     unreadNotifCount: Int = 1,
     isOffline: Boolean = false,
+    syncing: Boolean = false,
     onNotifClick: () -> Unit = {},
     onOfflineClick: () -> Unit = {},
-    onReferralClick: () -> Unit = {}
+    onReferralClick: () -> Unit = {},
+    onSyncClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -128,6 +132,27 @@ fun SkylinkBingwaTopAppBar(
                         .padding(top = 8.dp, end = 8.dp)
                         .size(10.dp)
                         .background(BrandGreen, CircleShape)
+                )
+            }
+        }
+
+        // Force-sync: pulls the latest offers, settings and billboards from the
+        // server right now, instead of waiting for the next scheduled check.
+        if (syncing) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp).padding(horizontal = 12.dp),
+                strokeWidth = 2.dp,
+                color = BrandGreen
+            )
+        } else {
+            IconButton(
+                onClick = onSyncClick,
+                modifier = Modifier.testTag("sync_button")
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Refresh,
+                    contentDescription = "Refresh",
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
         }

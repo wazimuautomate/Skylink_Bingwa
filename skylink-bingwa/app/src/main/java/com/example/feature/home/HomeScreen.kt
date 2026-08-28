@@ -86,7 +86,9 @@ fun HomeScreen(
     onPromotionAction: (Promotion) -> Unit,
     onNotifClick: () -> Unit,
     onOfflineClick: () -> Unit,
-    onReferralClick: () -> Unit = {}
+    onReferralClick: () -> Unit = {},
+    onSyncClick: () -> Unit = {},
+    syncing: Boolean = false
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -125,9 +127,11 @@ fun HomeScreen(
                 userName = state.greetingName,
                 unreadNotifCount = unreadNotifCount,
                 isOffline = state.isOffline,
+                syncing = syncing,
                 onNotifClick = onNotifClick,
                 onOfflineClick = onOfflineClick,
-                onReferralClick = onReferralClick
+                onReferralClick = onReferralClick,
+                onSyncClick = onSyncClick
             )
 
             LazyColumn(

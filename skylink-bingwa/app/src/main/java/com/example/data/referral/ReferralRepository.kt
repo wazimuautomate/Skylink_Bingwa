@@ -97,6 +97,12 @@ class ReferralRepository(context: Context) {
             _state.value = _state.value.copy(configured = false, loading = false, loadedOnce = true)
             return
         }
+        // Show a real, previously-fetched code the instant this screen opens, before
+        // the network round-trip even starts — and it is what is left on screen if
+        // that round-trip then fails.
+        if (_state.value.code.isBlank()) {
+            store.myCode()?.let { cached -> _state.value = _state.value.copy(code = cached) }
+        }
         _state.value = _state.value.copy(loading = true, offline = false)
 
         val token = store.authToken()

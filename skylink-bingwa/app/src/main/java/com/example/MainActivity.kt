@@ -196,6 +196,26 @@ fun SkylinkBingwaApp(
     val syncOrchestrator = remember(app) { app?.syncOrchestrator }
     val notificationEngine = remember(app) { app?.notificationEngine }
 
+    // The user-visible "refresh" button on Home/Offers/Help/Referrals: pulls
+    // config, catalogue and billboards right now rather than waiting for the next
+    // scheduled check. MANUAL_REFRESH has no throttle, so this always does a real
+    // fetch even if an incremental sync just ran a moment ago.
+    var manualSyncing by remember { mutableStateOf(false) }
+    val triggerManualSync: () -> Unit = {
+        scope.launch {
+            manualSyncing = true
+            try {
+                syncOrchestrator?.sync(SyncTrigger.MANUAL_REFRESH) ?: run {
+                    repository.syncRemoteConfig()
+                    repository.syncCatalogue()
+                    repository.syncBillboards()
+                }
+            } finally {
+                manualSyncing = false
+            }
+        }
+    }
+
     /**
      * The customer's learned purchase behaviour. Loaded from its own on-device store
      * for an instant cold start, then recomputed whenever Activity changes. It NEVER
@@ -687,6 +707,8 @@ fun SkylinkBingwaApp(
                         onPromotionAction = onPromotionAction,
                         onNotifClick = { showNotifications = true },
                         onReferralClick = { navController.navigate("referrals") },
+                        onSyncClick = triggerManualSync,
+                        syncing = manualSyncing,
                         onOfflineClick = {
                             navController.navigate("offers") {
                                 popUpTo("home") { saveState = true }
@@ -708,7 +730,9 @@ fun SkylinkBingwaApp(
                         onOfferSelect = openOffer,
                         onOfferBuy = openOffer,
                         onFavouriteToggle = { offer -> repository.setFavourite(offer.id, !offer.isFavourite) },
-                        onUndoFavourite = onUndoFavourite
+                        onUndoFavourite = onUndoFavourite,
+                        onRefresh = triggerManualSync,
+                        refreshing = manualSyncing
                     )
                 }
 
@@ -737,7 +761,9 @@ fun SkylinkBingwaApp(
                     HelpScreen(
                         prefilledRef = prefilledReportRef,
                         appConfig = appConfig,
-                        onOpenSettings = { navController.navigate("settings") }
+                        onOpenSettings = { navController.navigate("settings") },
+                        onRefresh = triggerManualSync,
+                        refreshing = manualSyncing
                     )
                 }
 

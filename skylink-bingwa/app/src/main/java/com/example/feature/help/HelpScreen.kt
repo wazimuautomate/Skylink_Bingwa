@@ -29,10 +29,13 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -71,7 +74,9 @@ data class FaqItem(
 fun HelpScreen(
     prefilledRef: String? = null,
     appConfig: AppConfig = AppConfig.DEFAULT,
-    onOpenSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    onRefresh: () -> Unit = {},
+    refreshing: Boolean = false
 ) {
     val context = LocalContext.current
     val faqs = remember(appConfig) {
@@ -114,12 +119,33 @@ fun HelpScreen(
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         // Header
-        Text(
-            text = "Help & Support",
-            style = TypographyPageHeading.copy(fontSize = 24.sp),
-            color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Help & Support",
+                style = TypographyPageHeading.copy(fontSize = 24.sp),
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
+            )
+            if (refreshing) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                IconButton(onClick = onRefresh, modifier = Modifier.testTag("help_sync_button")) {
+                    Icon(
+                        imageVector = Icons.Outlined.Refresh,
+                        contentDescription = "Refresh",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

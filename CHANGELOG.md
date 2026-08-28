@@ -10,6 +10,27 @@ Sections used: `Added`, `Changed`, `Fixed`, `Removed`, `Security`, `Internal`
 
 ## [Unreleased]
 
+## [1.0.18] - 2026-08-28
+
+### Added
+
+- **Force-refresh button** on Home, Offers and Help — to the right of the notification
+  bell on Home, top-right on Offers and Help. Pulls the latest offers, app config and
+  billboards from the server immediately (`SyncTrigger.MANUAL_REFRESH`, no throttle)
+  instead of waiting for the next scheduled check.
+- **Settings → Danger zone.** "Clear local data" is no longer sitting open on the
+  Settings screen: it is now behind a collapsed "Danger zone" disclosure, and tapping
+  it now asks for confirmation twice — a first dialog, then a second, starker one —
+  before anything is deleted.
+
+### Fixed
+
+- **Refer & Earn showing a blank code.** The Earn screen now shows the customer's own
+  code instantly from the last successful fetch, before the network call for this
+  visit even completes — previously nothing was shown until that call returned. If the
+  call fails, the screen now says so ("Could not load your code — check your
+  connection and tap refresh") instead of silently looking the same as "no code yet".
+
 ## [1.0.17] - 2026-08-28
 
 ### Added

@@ -23,11 +23,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -99,7 +101,9 @@ fun OffersScreen(
     onOfferSelect: (OfferItem) -> Unit,
     onOfferBuy: (OfferItem) -> Unit,
     onFavouriteToggle: (OfferItem) -> Unit,
-    onUndoFavourite: (String) -> Unit
+    onUndoFavourite: (String) -> Unit,
+    onRefresh: () -> Unit = {},
+    refreshing: Boolean = false
 ) {
     var showFilterSheet by remember { mutableStateOf(false) }
     val filterState = state.filter
@@ -132,12 +136,33 @@ fun OffersScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Text(
-                    text = "Offers",
-                    style = TypographyPageHeading.copy(fontSize = 24.sp),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Offers",
+                        style = TypographyPageHeading.copy(fontSize = 24.sp),
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.Bold
+                    )
+                    if (refreshing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    } else {
+                        IconButton(onClick = onRefresh, modifier = Modifier.testTag("offers_sync_button")) {
+                            Icon(
+                                imageVector = Icons.Outlined.Refresh,
+                                contentDescription = "Refresh",
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                    }
+                }
 
                 Spacer(Modifier.height(10.dp))
 

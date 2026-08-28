@@ -24,6 +24,8 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
@@ -91,6 +93,10 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     var showEditProfileSheet by remember { mutableStateOf(false) }
     var showClearDataDialog by remember { mutableStateOf(false) }
+    var showClearDataFinalConfirm by remember { mutableStateOf(false) }
+    // Collapsed by default: a one-tap-from-irreversible button has no business
+    // being the first thing a thumb lands on while scrolling this screen.
+    var dangerZoneExpanded by remember { mutableStateOf(false) }
     var checkingUpdates by remember { mutableStateOf(false) }
     var updateMessage by remember { mutableStateOf<String?>(null) }
     // Set when a manual "Check for updates" finds a newer direct-channel build.
@@ -293,39 +299,82 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Local Data Section
+        // Local Data Section — a collapsed "Danger zone" disclosure. The destructive
+        // button only exists once someone has deliberately chosen to look for it.
         SettingsGroupTitle("Local Data")
         Surface(
             shape = FieldButtonShape,
-            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
-            modifier = Modifier.fillMaxWidth()
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClickLabel = if (dangerZoneExpanded) "Collapse" else "Expand") {
+                    dangerZoneExpanded = !dangerZoneExpanded
+                }
+                .testTag("danger_zone_toggle")
         ) {
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Your profile, favourites and Activity are saved on this phone. Clearing them cannot be undone.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Outlined.DeleteForever,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        "Danger zone",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Icon(
+                    imageVector = if (dangerZoneExpanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = { showClearDataDialog = true },
-                    shape = FieldButtonShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
-                    ),
-                    modifier = Modifier.testTag("clear_local_data_button")
+            }
+        }
+
+        if (dangerZoneExpanded) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Surface(
+                shape = FieldButtonShape,
+                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(imageVector = Icons.Outlined.DeleteForever, contentDescription = null)
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("Clear local data", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Your profile, favourites and Activity are saved on this phone. Clearing them cannot be undone.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = { showClearDataDialog = true },
+                        shape = FieldButtonShape,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        ),
+                        modifier = Modifier.testTag("clear_local_data_button")
+                    ) {
+                        Icon(imageVector = Icons.Outlined.DeleteForever, contentDescription = null)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Clear local data", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
@@ -388,7 +437,9 @@ fun SettingsScreen(
         }
     }
 
-    // Clear Data Confirmation Dialog
+    // Clear Data Confirmation Dialog — first of two. This is deliberately not the
+    // last word: a single tap-through here only opens the final, starker dialog
+    // below, so an accidental or panicked tap never reaches the actual wipe.
     if (showClearDataDialog) {
         AlertDialog(
             onDismissRequest = { showClearDataDialog = false },
@@ -397,16 +448,42 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onClearLocalData()
                         showClearDataDialog = false
-                    }
+                        showClearDataFinalConfirm = true
+                    },
+                    modifier = Modifier.testTag("clear_local_data_confirm_1")
                 ) {
-                    Text("Clear local data", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                    Text("Continue", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showClearDataDialog = false }) {
                     Text("Keep my data")
+                }
+            }
+        )
+    }
+
+    // Second, final confirmation. Only this dialog actually deletes anything.
+    if (showClearDataFinalConfirm) {
+        AlertDialog(
+            onDismissRequest = { showClearDataFinalConfirm = false },
+            title = { Text("Are you completely sure?", fontWeight = FontWeight.Bold) },
+            text = { Text("There is no undo. Everything on this phone — profile, purchase history, favourites — will be gone for good.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onClearLocalData()
+                        showClearDataFinalConfirm = false
+                    },
+                    modifier = Modifier.testTag("clear_local_data_confirm_2")
+                ) {
+                    Text("Yes, delete everything", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearDataFinalConfirm = false }) {
+                    Text("Cancel")
                 }
             }
         )

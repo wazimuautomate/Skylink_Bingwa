@@ -151,6 +151,17 @@ fun ReferralScreen(
 
             Spacer(Modifier.height(8.dp))
 
+            // A blank code because the server has not answered yet looks identical to
+            // one because there is genuinely nothing to show, unless this says so.
+            if (state.offline && state.code.isBlank() && state.loadedOnce) {
+                NoticeCard(
+                    title = "Could not load your code",
+                    body = "Check your connection and tap refresh above to try again.",
+                    tone = MaterialTheme.colorScheme.error
+                )
+                Spacer(Modifier.height(16.dp))
+            }
+
             CodeHeroCard(
                 code = state.code,
                 shareMessage = state.shareMessage,
