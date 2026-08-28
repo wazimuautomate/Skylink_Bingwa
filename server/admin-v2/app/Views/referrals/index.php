@@ -11,6 +11,9 @@
 use App\Repositories\PaymentRepository;
 
 $ksh = static fn(int $cents): string => 'Ksh ' . number_format($cents / 100, 2);
+// Plain numbers for form inputs: strips ".00" so a whole-shilling value looks
+// like one (200, not 200.00) but a genuine fraction (e.g. a % rate) still shows.
+$num = static fn(float $n): string => rtrim(rtrim(number_format($n, 2, '.', ''), '0'), '.');
 $payoutsOn = (int) $settings['referral_payouts_enabled'] === 1;
 $programmeOn = (int) $settings['referral_enabled'] === 1;
 ?>
@@ -216,16 +219,16 @@ $programmeOn = (int) $settings['referral_enabled'] === 1;
     <h3>Earning</h3>
     <div class="form-grid mb">
       <div class="field">
-        <label for="s-bps">Default commission rate (bps)</label>
-        <input id="s-bps" type="number" name="referral_commission_bps" min="0" max="10000"
-               value="<?= (int) $settings['referral_commission_bps'] ?>">
-        <div class="hint">100 = 1%. A per-offer rate overrides this.</div>
+        <label for="s-pct">Commission rate (%)</label>
+        <input id="s-pct" type="number" name="referral_commission_pct" min="0" max="100" step="0.01"
+               value="<?= e($num($settings['referral_commission_bps'] / 100)) ?>">
+        <div class="hint">E.g. 10% earns Ksh 10 when a friend spends Ksh 100. Capped at each offer's own margin.</div>
       </div>
       <div class="field">
-        <label for="s-bonus">Signup bonus (cents)</label>
-        <input id="s-bonus" type="number" name="referral_signup_bonus_cents" min="0"
-               value="<?= (int) $settings['referral_signup_bonus_cents'] ?>">
-        <div class="hint">Paid per person who joins with a code.</div>
+        <label for="s-bonus">Signup bonus (Ksh)</label>
+        <input id="s-bonus" type="number" name="referral_signup_bonus_ksh" min="0" step="1"
+               value="<?= e($num($settings['referral_signup_bonus_cents'] / 100)) ?>">
+        <div class="hint">Paid once per person who joins with a code.</div>
       </div>
       <div class="field">
         <label for="s-hold">Hold window (hours)</label>
@@ -238,14 +241,14 @@ $programmeOn = (int) $settings['referral_enabled'] === 1;
     <h3>Withdrawals</h3>
     <div class="form-grid mb">
       <div class="field">
-        <label for="s-min">Minimum withdrawal (cents)</label>
-        <input id="s-min" type="number" name="referral_min_withdraw_cents" min="100"
-               value="<?= (int) $settings['referral_min_withdraw_cents'] ?>">
+        <label for="s-min">Minimum withdrawal (Ksh)</label>
+        <input id="s-min" type="number" name="referral_min_withdraw_ksh" min="1" step="1"
+               value="<?= e($num($settings['referral_min_withdraw_cents'] / 100)) ?>">
       </div>
       <div class="field">
-        <label for="s-max">Maximum per withdrawal (cents)</label>
-        <input id="s-max" type="number" name="referral_max_withdraw_cents" min="100"
-               value="<?= (int) $settings['referral_max_withdraw_cents'] ?>">
+        <label for="s-max">Maximum per withdrawal (Ksh)</label>
+        <input id="s-max" type="number" name="referral_max_withdraw_ksh" min="1" step="1"
+               value="<?= e($num($settings['referral_max_withdraw_cents'] / 100)) ?>">
       </div>
       <div class="field">
         <label for="s-cool">Cooldown between payouts (hours)</label>
@@ -254,15 +257,15 @@ $programmeOn = (int) $settings['referral_enabled'] === 1;
         <div class="hint">Limits how often one referrer can cash out.</div>
       </div>
       <div class="field">
-        <label for="s-cap">Daily payout cap, business-wide (cents)</label>
-        <input id="s-cap" type="number" name="referral_daily_cap_cents" min="0"
-               value="<?= (int) $settings['referral_daily_cap_cents'] ?>">
+        <label for="s-cap">Daily payout cap, business-wide (Ksh)</label>
+        <input id="s-cap" type="number" name="referral_daily_cap_ksh" min="0" step="1"
+               value="<?= e($num($settings['referral_daily_cap_cents'] / 100)) ?>">
         <div class="hint">The circuit breaker, whatever else goes wrong.</div>
       </div>
       <div class="field">
-        <label for="s-floor">Float alert floor (cents)</label>
-        <input id="s-floor" type="number" name="referral_float_floor_cents" min="0"
-               value="<?= (int) $settings['referral_float_floor_cents'] ?>">
+        <label for="s-floor">Float alert floor (Ksh)</label>
+        <input id="s-floor" type="number" name="referral_float_floor_ksh" min="0" step="1"
+               value="<?= e($num($settings['referral_float_floor_cents'] / 100)) ?>">
         <div class="hint">Warns when the B2C account drops below this.</div>
       </div>
     </div>
@@ -281,9 +284,9 @@ $programmeOn = (int) $settings['referral_enabled'] === 1;
                value="<?= (int) $settings['referral_max_daily_referrals'] ?>">
       </div>
       <div class="field">
-        <label for="s-earn">Maximum earned per referrer per day (cents)</label>
-        <input id="s-earn" type="number" name="referral_max_daily_earn_cents" min="0"
-               value="<?= (int) $settings['referral_max_daily_earn_cents'] ?>">
+        <label for="s-earn">Maximum earned per referrer per day (Ksh)</label>
+        <input id="s-earn" type="number" name="referral_max_daily_earn_ksh" min="0" step="1"
+               value="<?= e($num($settings['referral_max_daily_earn_cents'] / 100)) ?>">
         <div class="hint">Past this the account is parked for review.</div>
       </div>
       <div class="field">

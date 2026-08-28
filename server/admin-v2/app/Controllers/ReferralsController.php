@@ -38,7 +38,7 @@ final class ReferralsController extends Controller
     /** Every tunable, with the safe default used when the row is missing. */
     private const SETTINGS = [
         'referral_enabled'                  => 1,
-        'referral_commission_bps'           => 0,
+        'referral_commission_bps'           => 1000,
         'referral_signup_bonus_cents'       => 1000,
         'referral_bonus_requires_purchase'  => 1,
         'referral_hold_hours'               => 24,
@@ -149,17 +149,36 @@ final class ReferralsController extends Controller
         $before = self::currentSettings();
         $after = [];
 
+        // The form collects money in shillings and the rate as a plain percent —
+        // both are converted here to the cents/basis-points this table has always
+        // stored, so nothing downstream (ledger, cron, app) needs to know the form
+        // ever showed anything else.
+        $moneyFieldsKsh = [
+            'referral_signup_bonus_cents'   => 'referral_signup_bonus_ksh',
+            'referral_min_withdraw_cents'   => 'referral_min_withdraw_ksh',
+            'referral_max_withdraw_cents'   => 'referral_max_withdraw_ksh',
+            'referral_daily_cap_cents'      => 'referral_daily_cap_ksh',
+            'referral_float_floor_cents'    => 'referral_float_floor_ksh',
+            'referral_max_daily_earn_cents' => 'referral_max_daily_earn_ksh',
+        ];
+        $checkboxes = ['referral_enabled', 'referral_payouts_enabled', 'referral_bonus_requires_purchase'];
+
         foreach (array_keys(self::SETTINGS) as $key) {
+            if ($key === 'referral_commission_bps') {
+                $pct = (float) $request->post('referral_commission_pct', 0);
+                $after[$key] = max(0, (int) round($pct * 100));
+                continue;
+            }
+            if (isset($moneyFieldsKsh[$key])) {
+                $ksh = (float) $request->post($moneyFieldsKsh[$key], 0);
+                $after[$key] = max(0, (int) round($ksh * 100));
+                continue;
+            }
             $raw = $request->post($key);
             // Checkboxes post nothing when unticked, which is exactly "0".
-            $value = in_array($key, [
-                'referral_enabled',
-                'referral_payouts_enabled',
-                'referral_bonus_requires_purchase',
-            ], true)
+            $after[$key] = in_array($key, $checkboxes, true)
                 ? ($raw !== null ? 1 : 0)
                 : max(0, (int) $raw);
-            $after[$key] = $value;
         }
 
         // A commission rate cannot exceed 100%, and a maximum below the minimum
