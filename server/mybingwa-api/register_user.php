@@ -81,13 +81,17 @@ try {
 }
 
 try {
-    // Idempotent on the number: a reinstall or a retried call updates the name, token and
-    // counts the registration instead of creating a second customer.
+    // Idempotent on the number: the phone is the account, so a second "onboarding"
+    // of a number already on file is really just that customer coming back — never
+    // a second customer, and never a reason to relabel the first one. Whatever name
+    // was recorded first stands; a name typed on a later install only fills the row
+    // in if the first attempt somehow left it blank. app_version/fcm_token/
+    // registrations still update every time, since those describe THIS install.
     $stmt = $pdo->prepare(
         'INSERT INTO mb_customers (msisdn, name, app_version, fcm_token, registrations, created_at, updated_at)
               VALUES (?, ?, ?, ?, 1, NOW(), NOW())
          ON DUPLICATE KEY UPDATE
-              name = VALUES(name),
+              name = IF(name = \'\', VALUES(name), name),
               app_version = VALUES(app_version),
               fcm_token = COALESCE(VALUES(fcm_token), fcm_token),
               registrations = registrations + 1,
@@ -152,7 +156,9 @@ try {
             // Queued only after the commit, so a notification can never announce a
             // referral that was rolled back.
             if ($result['ok'] && $result['referrer']) {
-                ref_notify_joined($pdo, $settings, $result['referrer'], $name, (int) $result['referral_id']);
+                // The row's own name, not the request's: on a duplicate-number
+                // "reinstall" the two can differ, and the canonical one is correct.
+                ref_notify_joined($pdo, $settings, $result['referrer'], (string) $customer['name'], (int) $result['referral_id']);
             }
         }
     }
