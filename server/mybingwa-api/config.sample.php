@@ -116,6 +116,49 @@ $config = [
 // the admin in public_html/admin/) and the repository one (admin-v2/ as a sibling).
 // If neither resolves, or the admin holds no value for a key, NOTHING changes here —
 // the literal values above stand. Keys not listed can never be overridden remotely.
+// ---------------------------------------------------------------------------
+// M-Pesa B2C — referral commission payouts.
+//
+// B2C is a SEPARATE Daraja product from the STK Push above: its own Go-Live, its
+// own shortcode, and its own initiator credentials. It also pays from a FUNDED
+// utility account — your Till and Paybill collections do NOT top it up
+// automatically. Leave `b2c_shortcode` empty until Go-Live is complete; payouts
+// simply stay queued rather than failing.
+// ---------------------------------------------------------------------------
+
+// Your B2C organisation shortcode (NOT the Till or Paybill above).
+$config['b2c_shortcode'] = '';
+
+// The API initiator username created in the Daraja portal.
+$config['b2c_initiator_name'] = '';
+
+// Preferred: paste the SecurityCredential the Daraja portal generates for your
+// initiator. It is the initiator password encrypted with Safaricom's public
+// certificate, already base64-encoded.
+$config['b2c_security_credential'] = '';
+
+// Alternative to the above: give the PLAIN initiator password plus a path to
+// Safaricom's public certificate, and the server encrypts it on each call. Only
+// used when b2c_security_credential is empty.
+$config['b2c_initiator_password'] = '';
+$config['b2c_cert_path'] = '';
+
+// BusinessPayment is correct for a commission withdrawal. PromotionPayment would
+// attach a congratulatory M-Pesa message and misrepresent it as a prize.
+$config['b2c_command_id'] = 'BusinessPayment';
+
+// Both MUST be https and publicly reachable, exactly like callback_url.
+$config['b2c_result_url']  = 'https://PUT_YOUR_DOMAIN/b2c_result.php';
+$config['b2c_timeout_url'] = 'https://PUT_YOUR_DOMAIN/b2c_timeout.php';
+
+// Guards cron_referrals.php when cPanel cron calls it over HTTP. Invent a long
+// random string. A CLI cron (`php cron_referrals.php outbox`) does not need it.
+$config['cron_key'] = 'PUT_A_LONG_RANDOM_CRON_KEY';
+
+// Firebase service-account JSON for push notifications. Leave empty to use the
+// default search paths (the same file admin-v2's FcmService looks for).
+$config['fcm_service_account_file'] = '';
+
 $gw = false;
 foreach ([__DIR__ . '/admin/cutover/gateway_bridge.php', __DIR__ . '/../admin-v2/cutover/gateway_bridge.php'] as $bridgePath) {
     if (is_file($bridgePath)) {

@@ -85,7 +85,8 @@ fun HomeScreen(
     onUndoFavourite: (String) -> Unit,
     onPromotionAction: (Promotion) -> Unit,
     onNotifClick: () -> Unit,
-    onOfflineClick: () -> Unit
+    onOfflineClick: () -> Unit,
+    onReferralClick: () -> Unit = {}
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -125,7 +126,8 @@ fun HomeScreen(
                 unreadNotifCount = unreadNotifCount,
                 isOffline = state.isOffline,
                 onNotifClick = onNotifClick,
-                onOfflineClick = onOfflineClick
+                onOfflineClick = onOfflineClick,
+                onReferralClick = onReferralClick
             )
 
             LazyColumn(

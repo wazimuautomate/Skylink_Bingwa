@@ -10,6 +10,76 @@ Sections used: `Added`, `Changed`, `Fixed`, `Removed`, `Security`, `Internal`
 
 ## [Unreleased]
 
+## [1.0.17] - 2026-08-28
+
+### Added
+
+- **Refer & Earn — referral codes, commission and self-service M-Pesa withdrawal.**
+  Reachable from a gift icon in the top-right of the home screen (the bottom bar is
+  already full at five destinations, and this is a reward surface rather than a
+  shopping one). Every customer gets a server-minted code shaped `SK` + three digits
+  + a letter, e.g. `SK391R`, with tap-to-copy and a share sheet. Onboarding gains an
+  optional referral-code field that validates live and confirms the referrer's first
+  name; a wrong or unreachable code never blocks onboarding.
+- **Commission engine.** The referrer earns Ksh 10 when someone joins with their code
+  and a per-offer percentage on everything that person buys. Accrual hooks the single
+  observation of the `PAYMENT_REQUESTED → PAYMENT_CONFIRMED` transition in
+  `callback.php`, inheriting the exactly-once guarantee that code already provided,
+  with a second independent guard from the ledger's unique idempotency key.
+- **Append-only commission ledger.** Money is signed integer cents; balances are a
+  projection of `SUM(amount_cents)`, never a mutable column. The cached balance is
+  written in the same transaction as its ledger row and a nightly job asserts the two
+  agree — reporting drift rather than silently "fixing" it, which would destroy the
+  evidence.
+- **M-Pesa B2C payouts** with the full asynchronous state machine: our own
+  `OriginatorConversationID` persisted before the outbound call, a distinct `UNKNOWN`
+  state that is never auto-refunded and never auto-retried, and a reconciler that
+  resolves it only through Daraja's `TransactionStatus`.
+- **Lazy phone verification.** A one-time SMS code, asked for the first time someone
+  withdraws, issues a bearer token; the payout destination is the verified number held
+  on the server and can never be supplied by the caller. Changing it re-verifies and
+  freezes withdrawals for 48 hours.
+- **Anti-farming controls.** One referral redemption per handset for life (keyed on a
+  hashed device id, which survives the uninstall/reinstall/new-SIM loop), a cap on
+  numbers per handset, per-referrer velocity limits, and a signup bonus that does not
+  become withdrawable until the referred person actually buys something.
+- **Admin: Referrals & commissions.** Overview with outstanding liability and
+  unresolved-payout alerts, referrer list and per-referrer ledger, withdrawals queue
+  with `UNKNOWN` sorted first, manual adjustments (as ledger entries, never balance
+  edits), full programme settings and a payouts kill switch. Offers gain
+  `commission_bps` and `margin_bps`, and the form refuses a commission above margin.
+- **Notification outbox.** SMS and push are queued and drained by cron with
+  exponential backoff, so a slow provider can never stall the Daraja callback.
+
+### Removed
+
+- **The admin's scheduled-notifications module** — editor, campaigns, wording
+  variations, catalogue tables, delivery log, publish section, and the two public
+  endpoints that served it (`get_app_notifications.php`,
+  `get_notification_templates.php`). Instant Push does the same job immediately and
+  without a publish cycle; keeping both meant two places to write a message and two
+  ways for it to be wrong. The app falls back to the notification wording compiled
+  into the APK — already its behaviour on any install with no server configured — and
+  Instant Push is unaffected.
+
+### Security
+
+- Endpoints that move money require a bearer token in addition to `X-App-Key`.
+  `X-App-Key` is a constant compiled into the APK and extractable by anyone who
+  decompiles it; it was sufficient while the worst a forged request could do was push
+  an STK prompt to the attacker's own phone, and is not sufficient now that a payout
+  endpoint exists.
+- OTP codes are stored only as SHA-256, compared with `hash_equals`, single-use,
+  capped at five attempts, and rate limited per number and per source IP. Bearer
+  tokens are likewise stored only as hashes.
+
+### Internal
+
+- Commission rates default to **0%** and automatic payouts default to **off**, so the
+  feature cannot move money until the owner has recorded real per-offer margins and
+  completed B2C Go-Live.
+
+
 ## [1.0.12] - 2026-08-24
 
 ### Fixed

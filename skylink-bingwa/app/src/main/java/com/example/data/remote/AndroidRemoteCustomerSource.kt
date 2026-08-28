@@ -1,5 +1,8 @@
 package com.example.data.remote
 
+import android.content.Context
+import com.example.core.device.DeviceIdentity
+import com.example.data.referral.ReferralStore
 import com.squareup.moshi.Json
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -33,8 +36,17 @@ interface RemoteCustomerSource {
 class AndroidRemoteCustomerSource(
     baseUrl: String,
     appKey: String,
-    enableLogging: Boolean = false
+    enableLogging: Boolean = false,
+    /**
+     * Application context, used only by the referral programme: it supplies the
+     * handset's stable id and the referral code the customer typed during
+     * onboarding. Null keeps the original behaviour exactly — registration still
+     * works, it simply carries no referral information.
+     */
+    private val context: Context? = null
 ) : RemoteCustomerSource {
+
+    private val referralStore = context?.let { ReferralStore(it) }
 
     private val api: CustomerApi? = if (baseUrl.startsWith("https://")) {
         val client = OkHttpClient.Builder()
@@ -56,15 +68,40 @@ class AndroidRemoteCustomerSource(
     }
 
     override suspend fun register(name: String, msisdn: String, appVersion: String, fcmToken: String?): Boolean {
+        // The referral code the customer typed at onboarding, held locally until this
+        // call actually reaches the server. Onboarding can finish offline, so without
+        // that hold the referrer would silently lose their credit.
+        val pendingCode = referralStore?.pendingReferralCode()
+        val deviceId = context?.let { DeviceIdentity.stableId(it) }
+
         val response = try {
-            api?.register(RegisterCustomerDto(name = name, msisdn = msisdn, appVersion = appVersion, fcmToken = fcmToken))
-                ?: return false
+            api?.register(
+                RegisterCustomerDto(
+                    name = name,
+                    msisdn = msisdn,
+                    appVersion = appVersion,
+                    fcmToken = fcmToken,
+                    referralCode = pendingCode,
+                    deviceId = deviceId
+                )
+            ) ?: return false
         } catch (t: Throwable) {
             // Offline, a timeout, a 4xx/5xx — all the same to the caller: not yet
             // registered, try again on a later launch.
             return false
         }
-        return response.status.equals("REGISTERED", ignoreCase = true)
+
+        val ok = response.status.equals("REGISTERED", ignoreCase = true)
+        if (ok) {
+            // Cache this customer's own code so the Earn screen has something real to
+            // show immediately, even with no network.
+            response.referralCode?.takeIf { it.isNotBlank() }?.let { referralStore?.setMyCode(it) }
+            // Clear the pending code once the server has ruled on it, whatever it
+            // decided. Retrying a code the server already rejected only produces the
+            // same rejection, and attribution is permanent either way.
+            referralStore?.setPendingReferralCode(null)
+        }
+        return ok
     }
 }
 
@@ -77,10 +114,16 @@ data class RegisterCustomerDto(
     @Json(name = "name") val name: String,
     @Json(name = "msisdn") val msisdn: String,
     @Json(name = "appVersion") val appVersion: String,
-    @Json(name = "fcm_token") val fcmToken: String? = null
+    @Json(name = "fcm_token") val fcmToken: String? = null,
+    @Json(name = "referralCode") val referralCode: String? = null,
+    @Json(name = "deviceId") val deviceId: String? = null
 )
 
 data class RegisterCustomerResponseDto(
     @Json(name = "status") val status: String = "",
-    @Json(name = "errorCode") val errorCode: String? = null
+    @Json(name = "errorCode") val errorCode: String? = null,
+    /** This customer's OWN referral code, minted server-side at registration. */
+    @Json(name = "referralCode") val referralCode: String? = null,
+    @Json(name = "referralApplied") val referralApplied: Boolean = false,
+    @Json(name = "referralReason") val referralReason: String? = null
 )

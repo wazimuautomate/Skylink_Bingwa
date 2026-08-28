@@ -87,6 +87,10 @@ final class OffersController extends Controller
             'starts_at' => $this->toUtc($request->post('starts_at')),
             'ends_at' => $this->toUtc($request->post('ends_at')),
             'sort_hint' => (int) $request->post('sort_hint', 0),
+            // Referral economics, in basis points (300 = 3.00%). Blank means
+            // "fall back to the category or global rate" rather than zero.
+            'commission_bps' => $request->post('commission_bps', '') === '' ? null : (int) $request->post('commission_bps'),
+            'margin_bps' => $request->post('margin_bps', '') === '' ? null : (int) $request->post('margin_bps'),
         ];
 
         $v = Validator::make($input);
@@ -111,6 +115,13 @@ final class OffersController extends Controller
         }
         if (!$isNew && !OfferRepository::exists($input['offer_id'])) {
             $v->add('offer_id', 'Offer not found.');
+        }
+        // A referral commission above the real margin loses money on every referred
+        // sale, and the loss grows the better the referral programme works. Refused
+        // here rather than trusting whoever fills the form to remember.
+        if ($input['commission_bps'] !== null && $input['margin_bps'] !== null
+            && $input['commission_bps'] > $input['margin_bps']) {
+            $v->add('commission_bps', 'Commission cannot be higher than this offer\'s margin.');
         }
         if ($v->fails()) {
             Flash::error('Please correct the highlighted fields.');

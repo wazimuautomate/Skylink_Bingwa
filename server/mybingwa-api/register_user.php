@@ -21,6 +21,7 @@
 
 $config = require __DIR__ . '/config.php';
 require __DIR__ . '/lib.php';
+require_once __DIR__ . '/referrals.php';
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     json_out(['status' => 'REGISTER_FAILED', 'errorCode' => 'METHOD_NOT_ALLOWED'], 405);
@@ -45,6 +46,13 @@ $name = mb_substr($name, 0, 80);
 $appVersion = mb_substr($appVersion, 0, 24);
 $fcmToken = trim((string) ($body['fcm_token'] ?? $body['fcmToken'] ?? ''));
 $fcmToken = $fcmToken !== '' ? mb_substr($fcmToken, 0, 255) : null;
+
+// Referral inputs. The code is optional and a bad one NEVER fails onboarding —
+// a blocked first run is worse than a lost attribution. The device id is the
+// spine of the anti-farming rules in referrals.php: it is hashed immediately and
+// the raw value is never stored.
+$referralCode = ref_code_normalise((string) ($body['referralCode'] ?? $body['referral_code'] ?? ''));
+$deviceHash = ref_device_hash((string) ($body['deviceId'] ?? $body['device_id'] ?? ''));
 
 $pdo = require __DIR__ . '/db.php';
 
@@ -90,4 +98,71 @@ try {
     json_out(['status' => 'REGISTER_FAILED', 'errorCode' => 'DB_WRITE_FAILED'], 500);
 }
 
-json_out(['status' => 'REGISTERED']);
+// --- Referral programme -----------------------------------------------------
+// Everything below is best-effort. A customer is registered the moment the row
+// above is written; nothing in the referral system may turn a successful
+// registration into a failed one, so the whole block is wrapped and any failure
+// simply returns the customer their own code (or none) without an error.
+$myCode = '';
+$referralApplied = false;
+$referralReason = 'NONE';
+
+try {
+    ref_provision($pdo);
+    $settings = ref_settings($pdo);
+
+    // ON DUPLICATE KEY UPDATE does not give a usable lastInsertId, so read the
+    // canonical row back by its natural key.
+    $cust = $pdo->prepare('SELECT id, name FROM ' . ref_t('customers') . ' WHERE msisdn = ? LIMIT 1');
+    $cust->execute([$msisdn]);
+    $customer = $cust->fetch();
+
+    if ($customer) {
+        $customerId = (int) $customer['id'];
+
+        // Bind the handset to this customer before any attribution decision, so
+        // the device rules below see the current picture.
+        if ($deviceHash !== null) {
+            $pdo->prepare('UPDATE ' . ref_t('customers') . ' SET device_hash = COALESCE(device_hash, ?) WHERE id = ?')
+                ->execute([$deviceHash, $customerId]);
+            ref_touch_device($pdo, $deviceHash, $msisdn, $settings);
+        }
+
+        // Every customer gets their own code, whether or not they used one.
+        $me = ref_ensure_referrer($pdo, $customerId);
+        $myCode = $me['code'] ?? '';
+
+        if ($referralCode !== '') {
+            // Attribution writes four related rows — the referral, the device's
+            // spent redemption, the referrer's counter and the bonus ledger entry.
+            // They belong together: a referral recorded without its redemption
+            // marked would hand the same handset a second free bonus.
+            $pdo->beginTransaction();
+            try {
+                $result = ref_attribute($pdo, $settings, $customerId, $msisdn, $referralCode, $deviceHash);
+                $pdo->commit();
+            } catch (Throwable $e) {
+                $pdo->rollBack();
+                throw $e;
+            }
+
+            $referralApplied = $result['ok'];
+            $referralReason = $result['reason'];
+
+            // Queued only after the commit, so a notification can never announce a
+            // referral that was rolled back.
+            if ($result['ok'] && $result['referrer']) {
+                ref_notify_joined($pdo, $settings, $result['referrer'], $name, (int) $result['referral_id']);
+            }
+        }
+    }
+} catch (Throwable $e) {
+    error_log('[register_user] referral step failed: ' . $e->getMessage());
+}
+
+json_out([
+    'status'          => 'REGISTERED',
+    'referralCode'    => $myCode,
+    'referralApplied' => $referralApplied,
+    'referralReason'  => $referralReason,
+]);

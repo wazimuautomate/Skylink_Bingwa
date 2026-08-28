@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Redeem
 import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,7 +41,8 @@ fun SkylinkBingwaTopAppBar(
     unreadNotifCount: Int = 1,
     isOffline: Boolean = false,
     onNotifClick: () -> Unit = {},
-    onOfflineClick: () -> Unit = {}
+    onOfflineClick: () -> Unit = {},
+    onReferralClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -90,6 +92,21 @@ fun SkylinkBingwaTopAppBar(
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
+        }
+
+        // Refer & Earn. It sits in the header rather than the bottom bar because the
+        // bottom bar is already full at five destinations, and a sixth would squeeze
+        // every label. This is also a reward surface, not a primary shopping
+        // destination — the header is where it belongs.
+        IconButton(
+            onClick = onReferralClick,
+            modifier = Modifier.testTag("referral_button")
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Redeem,
+                contentDescription = "Refer and earn",
+                tint = BrandGreen
+            )
         }
 
         // Notification Icon with Badge (opens the notification-centre overlay).

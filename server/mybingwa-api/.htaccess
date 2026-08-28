@@ -1,8 +1,14 @@
 # Block the web from downloading internal files. The public endpoints
-# (stk.php, status.php, callback.php) stay reachable.
-<FilesMatch "^(config|config\.sample|db|lib|offers)\.php$">
+# (stk.php, status.php, callback.php, register_user.php, the referral/Earn
+# endpoints and the B2C result/timeout URLs) stay reachable.
+#
+# referrals.php, b2c.php and fcm.php are LIBRARIES, not endpoints: they define
+# functions and must never be requested directly. cron_referrals.php stays
+# reachable because cPanel cron may call it over HTTP, but it refuses any request
+# without the cron_key.
+<FilesMatch "^(config|config\.sample|db|lib|offers|referrals|b2c|fcm)\.php$">
     Require all denied
 </FilesMatch>
-<FilesMatch "\.(sql|md|log)$">
+<FilesMatch "\.(sql|md|log|json)$">
     Require all denied
 </FilesMatch>

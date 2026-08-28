@@ -16,6 +16,7 @@
 
 $config = require __DIR__ . '/config.php';
 require __DIR__ . '/lib.php';
+require_once __DIR__ . '/referrals.php';
 
 $rawInput = file_get_contents('php://input');
 
@@ -96,6 +97,17 @@ if ($cb && isset($cb['CheckoutRequestID'])) {
                 'PAYMENT_CONFIRMED',
             ]);
             $weConfirmed = $upd->rowCount() === 1;
+
+            // Referral commission. Hooked to $weConfirmed on purpose: that flag is
+            // the ONE observation of the REQUESTED → CONFIRMED transition, so the
+            // accrual inherits the exactly-once guarantee the payment row already
+            // provides. The ledger's own idempotency key is the second, independent
+            // guard against a replayed callback. Best-effort by contract — it never
+            // throws and never delays the ack below, because a slow ack invites
+            // Safaricom to retry and pile pressure on this exact code path.
+            if ($weConfirmed && $status === 'PAYMENT_CONFIRMED') {
+                ref_accrue_for_payment($pdo, $row);
+            }
 
             // Buy-for-another fulfilment signal: on the FIRST confirmation only, and
             // only when payer != recipient, send the mocked M-Pesa SMS naming the

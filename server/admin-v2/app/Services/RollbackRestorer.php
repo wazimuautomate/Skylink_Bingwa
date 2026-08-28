@@ -38,9 +38,6 @@ final class RollbackRestorer
         if (array_key_exists('featureFlags', $snap) && is_array($snap['featureFlags'])) {
             self::restoreFeatureFlags($snap['featureFlags']);
         }
-        if (array_key_exists('notifications', $snap) && is_array($snap['notifications'])) {
-            self::restoreNotifications($snap['notifications'], $actor);
-        }
         if (array_key_exists('billboards', $snap) && is_array($snap['billboards'])) {
             self::restoreBillboards($snap['billboards'], $actor);
         }
@@ -130,105 +127,6 @@ final class RollbackRestorer
         }
     }
 
-    /* ------------------------------------------------------------ notifications */
-
-    /**
-     * Campaigns are identified by their numeric id, which is what the snapshot carries.
-     * Variations are replaced wholesale for a restored campaign (they have no stable id
-     * of their own in the snapshot), and campaigns missing from the snapshot are disabled
-     * rather than deleted.
-     */
-    private static function restoreNotifications(array $notifications, string $actor): void
-    {
-        $t = Database::table('notification_campaigns');
-        $v = Database::table('notification_variations');
-        $keep = [];
-
-        foreach ($notifications as $n) {
-            if (!is_array($n) || (int) ($n['id'] ?? 0) <= 0) {
-                continue;
-            }
-            $id = (int) $n['id'];
-            $keep[] = $id;
-            $variations = is_array($n['variations'] ?? null) ? $n['variations'] : [];
-            $first = is_array($variations[0] ?? null) ? $variations[0] : ['title' => '', 'body' => ''];
-            $days = is_array($n['daysOfWeek'] ?? null) ? implode(',', array_map('intval', $n['daysOfWeek'])) : '';
-
-            Database::run(
-                "INSERT INTO {$t}
-                    (id, name, title, body, deep_link, linked_offer_id, category, trigger_type, trigger_event,
-                     priority, starts_on, ends_on, days_of_week, allowed_time_start, allowed_time_end,
-                     cooldown_minutes, frequency_cap, respect_quiet_hours, suppress_recent_purchase,
-                     expires_at, enabled, status, row_version, created_at, updated_at, updated_by)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 'active', 1,
-                         UTC_TIMESTAMP(), UTC_TIMESTAMP(), ?)
-                 ON DUPLICATE KEY UPDATE name=VALUES(name), title=VALUES(title), body=VALUES(body),
-                    deep_link=VALUES(deep_link), linked_offer_id=VALUES(linked_offer_id),
-                    category=VALUES(category), trigger_type=VALUES(trigger_type), trigger_event=VALUES(trigger_event),
-                    priority=VALUES(priority), starts_on=VALUES(starts_on), ends_on=VALUES(ends_on),
-                    days_of_week=VALUES(days_of_week), allowed_time_start=VALUES(allowed_time_start),
-                    allowed_time_end=VALUES(allowed_time_end), cooldown_minutes=VALUES(cooldown_minutes),
-                    frequency_cap=VALUES(frequency_cap), respect_quiet_hours=VALUES(respect_quiet_hours),
-                    suppress_recent_purchase=VALUES(suppress_recent_purchase), expires_at=VALUES(expires_at),
-                    enabled=1, status='active', row_version = row_version + 1,
-                    updated_at=UTC_TIMESTAMP(), updated_by=VALUES(updated_by)",
-                [
-                    $id,
-                    (string) ($n['name'] ?? ('Notification #' . $id)),
-                    (string) ($first['title'] ?? ''),
-                    (string) ($first['body'] ?? ''),
-                    (string) ($n['deepLink'] ?? ''),
-                    ($n['linkedOfferId'] ?? '') !== '' ? $n['linkedOfferId'] : null,
-                    (string) ($n['category'] ?? ''),
-                    (string) ($n['trigger'] ?? 'manual'),
-                    (string) ($n['triggerEvent'] ?? ''),
-                    (string) ($n['priority'] ?? 'normal'),
-                    $n['startsOn'] ?? null,
-                    $n['endsOn'] ?? null,
-                    $days,
-                    (string) ($n['timeStart'] ?? ''),
-                    (string) ($n['timeEnd'] ?? ''),
-                    (int) ($n['cooldownMinutes'] ?? 0),
-                    (int) ($n['frequencyCap'] ?? 1),
-                    !empty($n['respectQuietHours']) ? 1 : 0,
-                    !empty($n['suppressRecentPurchase']) ? 1 : 0,
-                    self::dbDatetime($n['expiresAt'] ?? null),
-                    $actor,
-                ]
-            );
-
-            Database::run("DELETE FROM {$v} WHERE campaign_id = ?", [$id]);
-            $order = 0;
-            foreach ($variations as $variation) {
-                if (!is_array($variation)) {
-                    continue;
-                }
-                Database::run(
-                    "INSERT INTO {$v} (campaign_id, title, body, sort_order, enabled, created_at, updated_at)
-                     VALUES (?, ?, ?, ?, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP())",
-                    [$id, (string) ($variation['title'] ?? ''), (string) ($variation['body'] ?? ''), $order++]
-                );
-            }
-        }
-
-        if ($keep !== []) {
-            $in = implode(',', array_fill(0, count($keep), '?'));
-            Database::run(
-                "UPDATE {$t} SET enabled = 0, updated_at = UTC_TIMESTAMP(), updated_by = ?
-                  WHERE enabled = 1 AND status = 'active' AND id NOT IN ({$in})",
-                array_merge([$actor], $keep)
-            );
-        }
-    }
-
-    /* -------------------------------------------------------------- billboards */
-
-    /**
-     * Restore the published content, media descriptors and tap target of billboards that
-     * still exist. Billboards are never re-created here (their internal name and uploaded
-     * asset are not part of a snapshot); ones absent from the snapshot are switched off so
-     * the app sees exactly the carousel that version served.
-     */
     private static function restoreBillboards(array $billboards, string $actor): void
     {
         $t = Database::table('billboards');

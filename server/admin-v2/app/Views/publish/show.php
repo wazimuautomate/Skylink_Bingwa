@@ -92,7 +92,6 @@ $uid = (string) ($release['release_uid'] ?? '');
         <div class="row">
           <span class="tag muted">Offers: <?= count($snap['offers'] ?? []) ?></span>
           <span class="tag muted">Billboards: <?= count($snap['billboards'] ?? []) ?></span>
-          <span class="tag muted">Notifications: <?= count($snap['notifications'] ?? []) ?></span>
           <span class="tag muted">Categories: <?= count($snap['categories'] ?? []) ?></span>
         </div>
       </div>

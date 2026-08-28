@@ -28,7 +28,6 @@ final class ChangeDetector
         'offers'        => 'Offers',
         'categories'    => 'Categories',
         'billboards'    => 'Billboards',
-        'notifications' => 'Notifications',
         'support'       => 'Payment & support details',
         'appConfig'     => 'App configuration',
         'featureFlags'  => 'Feature flags',
@@ -40,7 +39,6 @@ final class ChangeDetector
         'offer'        => 'offers',
         'category'     => 'categories',
         'billboard'    => 'billboards',
-        'notification' => 'notifications',
         'support'      => 'support',
         'appConfig'    => 'appConfig',
         'app_config'   => 'appConfig',   // release rows written before the rename
@@ -74,16 +72,6 @@ final class ChangeDetector
             'internalAction' => 'Internal screen', 'targetCategory' => 'Target category',
             'audienceRule' => 'Audience', 'frequencyCap' => 'Frequency cap',
             'startsAt' => 'Starts', 'endsAt' => 'Ends',
-        ],
-        'notification' => [
-            'id' => 'Notification id', 'name' => 'Name', 'category' => 'Category',
-            'trigger' => 'Trigger', 'triggerEvent' => 'Trigger event', 'priority' => 'Priority',
-            'variations' => 'Wording variations', 'deepLink' => 'Deep link',
-            'linkedOfferId' => 'Linked offer', 'startsOn' => 'Starts on', 'endsOn' => 'Ends on',
-            'daysOfWeek' => 'Days of week', 'timeStart' => 'From time', 'timeEnd' => 'To time',
-            'cooldownMinutes' => 'Cooldown (minutes)', 'frequencyCap' => 'Frequency cap',
-            'respectQuietHours' => 'Respect quiet hours',
-            'suppressRecentPurchase' => 'Suppress after purchase', 'expiresAt' => 'Expires',
         ],
         'support' => [
             'tillNumber' => 'Till number', 'paybillNumber' => 'Paybill number',

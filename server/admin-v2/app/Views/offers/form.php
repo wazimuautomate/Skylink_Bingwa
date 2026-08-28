@@ -67,6 +67,18 @@ $hasErr = fn($k) => isset($errs[$k]) ? 'has-error' : '';
           <label>Price (KSh)</label>
           <input type="number" name="price" value="<?= e($val('price')) ?>" min="1" required><?= $err('price') ?>
         </div>
+        <div class="field <?= $hasErr('margin_bps') ?>">
+          <label>Your margin <span class="muted small">(basis points, optional)</span></label>
+          <input type="number" name="margin_bps" value="<?= e($val('margin_bps')) ?>" min="0" max="10000" placeholder="e.g. 400">
+          <span class="hint">100 = 1%. What you actually make on this offer. Referral commission can never be saved above it.</span>
+          <?= $err('margin_bps') ?>
+        </div>
+        <div class="field <?= $hasErr('commission_bps') ?>">
+          <label>Referral commission <span class="muted small">(basis points, optional)</span></label>
+          <input type="number" name="commission_bps" value="<?= e($val('commission_bps')) ?>" min="0" max="10000" placeholder="blank = use default">
+          <span class="hint">Leave blank to use the programme default. Paid to whoever referred the buyer.</span>
+          <?= $err('commission_bps') ?>
+        </div>
         <div class="field <?= $hasErr('validity') ?>">
           <label>Validity</label>
           <input type="text" name="validity" value="<?= e($val('validity')) ?>" placeholder="24 Hrs" required><?= $err('validity') ?>

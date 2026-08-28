@@ -152,6 +152,15 @@ private enum class OnboardingStep { WELCOME, SETUP, NOTIFICATIONS }
 @Composable
 fun OnboardingScreen(
     onCompleteOnboarding: (String, String) -> Unit,
+    /**
+     * The referral code the customer typed, or null. Called once, just before
+     * onboarding completes, so the code is held locally until registration
+     * actually reaches the server — onboarding can finish offline, and without
+     * that hold the referrer would silently lose their credit.
+     */
+    onReferralCodeEntered: (String?) -> Unit = {},
+    /** Live lookup while typing. Returns the referrer's first name, or null. */
+    onCheckReferralCode: suspend (String) -> String? = { null },
     onRequestNotificationPermission: () -> Unit = {},
     notificationsGranted: Boolean = false,
     onOpenAppSettings: () -> Unit = {},
@@ -183,6 +192,24 @@ fun OnboardingScreen(
     var phoneError by remember { mutableStateOf<String?>(null) }
     var launching by remember { mutableStateOf(false) }
 
+    // Referral code. Optional, and never blocking: a first run stopped by a mistyped
+    // code is a far worse outcome than a lost attribution, so nothing here can fail
+    // onboarding. The server makes the real decision anyway.
+    var referralInput by remember { mutableStateOf("") }
+    var referrerName by remember { mutableStateOf<String?>(null) }
+    var referralChecking by remember { mutableStateOf(false) }
+
+    // Debounced lookup, so a six-character code is not six network calls.
+    LaunchedEffect(referralInput) {
+        val code = referralInput.trim().uppercase()
+        referrerName = null
+        if (code.length != 6) return@LaunchedEffect
+        referralChecking = true
+        delay(400)
+        referrerName = onCheckReferralCode(code)
+        referralChecking = false
+    }
+
     fun advance() {
         if (safeIndex < steps.lastIndex) stepIndex = safeIndex + 1
     }
@@ -203,6 +230,8 @@ fun OnboardingScreen(
             phoneError = if (normalized == null) "Enter a valid Safaricom number" else null
             return
         }
+
+        onReferralCodeEntered(referralInput.trim().uppercase().takeIf { it.length == 6 })
 
         if (reducedMotion) {
             onCompleteOnboarding(trimmedName, normalized)
@@ -297,7 +326,11 @@ fun OnboardingScreen(
                         phoneError = phoneError,
                         reducedMotion = reducedMotion,
                         onNameChange = { nameInput = it; nameError = null },
-                        onPhoneChange = { phoneInput = it; phoneError = null }
+                        onPhoneChange = { phoneInput = it; phoneError = null },
+                        referralCode = referralInput,
+                        referrerName = referrerName,
+                        referralChecking = referralChecking,
+                        onReferralChange = { referralInput = it.uppercase().filter { ch -> ch.isLetterOrDigit() }.take(6) }
                     )
                 }
             }
@@ -826,7 +859,11 @@ private fun StepSetup(
     phoneError: String?,
     reducedMotion: Boolean,
     onNameChange: (String) -> Unit,
-    onPhoneChange: (String) -> Unit
+    onPhoneChange: (String) -> Unit,
+    referralCode: String = "",
+    referrerName: String? = null,
+    referralChecking: Boolean = false,
+    onReferralChange: (String) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -894,6 +931,60 @@ private fun StepSetup(
             }
         }
         if (phoneError != null) FieldError(phoneError)
+
+        Spacer(Modifier.height(16.dp))
+
+        // Optional referral code. Never validated as a blocking error — an unknown
+        // code just does not light up, and onboarding continues either way.
+        SlideIn(fromLeft = true, reducedMotion = reducedMotion) {
+            GlassSurface(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = referralCode,
+                    onValueChange = onReferralChange,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp),
+                    label = { Text("Referral code (optional)") },
+                    placeholder = { Text("SK391R") },
+                    leadingIcon = { Icon(Icons.Rounded.CardGiftcard, contentDescription = null) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color.Transparent, unfocusedBorderColor = Color.Transparent, errorBorderColor = Color.Transparent, disabledBorderColor = Color.Transparent)
+                )
+            }
+        }
+
+        // Confirmation that the code landed on a real person. Deliberately a first
+        // name only — nothing else about another customer is anyone's business.
+        if (referrerName != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp, top = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.CheckCircle,
+                    contentDescription = null,
+                    tint = BrandBrightGreen,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = "You were referred by " + referrerName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = BrandBrightGreen
+                )
+            }
+        } else if (referralCode.length == 6 && !referralChecking) {
+            Row(modifier = Modifier.fillMaxWidth().padding(start = 8.dp, top = 6.dp)) {
+                Text(
+                    text = "We could not check that code right now. You can still continue.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
 
         Spacer(Modifier.height(20.dp))
     }

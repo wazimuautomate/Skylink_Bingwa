@@ -94,20 +94,6 @@ $router->post('/billboards/{id}/delete', [App\Controllers\BillboardsController::
 $router->get('/billboards/import',     [App\Controllers\ImportController::class, 'billboardsForm']);
 $router->post('/billboards/import',    [App\Controllers\ImportController::class, 'importBillboards']);
 
-/* --------------------------------------------------------------- notifications */
-$router->get('/notifications',           [App\Controllers\NotificationsController::class, 'index']);
-$router->get('/notifications/calendar',  [App\Controllers\NotificationsController::class, 'calendar']);
-$router->get('/notifications/new',       [App\Controllers\NotificationsController::class, 'create']);
-$router->get('/notifications/{id}/edit', [App\Controllers\NotificationsController::class, 'edit']);
-$router->post('/notifications/save',     [App\Controllers\NotificationsController::class, 'save']);
-$router->post('/notifications/{id}/cancel', [App\Controllers\NotificationsController::class, 'cancel']);
-$router->post('/notifications/{id}/toggle', [App\Controllers\NotificationsController::class, 'toggle']);
-$router->post('/notifications/{id}/duplicate', [App\Controllers\NotificationsController::class, 'duplicate']);
-$router->post('/notifications/{id}/delete', [App\Controllers\NotificationsController::class, 'delete']);
-$router->post('/notifications/preview',  [App\Controllers\NotificationsController::class, 'preview']);
-$router->post('/notifications/{id}/test',[App\Controllers\NotificationsController::class, 'testSend']);
-$router->get('/notifications/import',    [App\Controllers\ImportController::class, 'notificationsForm']);
-$router->post('/notifications/import',   [App\Controllers\ImportController::class, 'importNotifications']);
 
 /* ------------------------------------------------------------- instant push */
 $router->get('/push',                      [App\Controllers\PushController::class, 'index']);
@@ -118,6 +104,17 @@ $router->get('/customers',                  [App\Controllers\CustomersController
 $router->get('/customers-export',           [App\Controllers\CustomersController::class, 'exportCsv']);
 $router->post('/customers/delete-bulk',     [App\Controllers\CustomersController::class, 'deleteBulk']);
 $router->post('/customers/{id}/delete',     [App\Controllers\CustomersController::class, 'delete']);
+
+/* ------------------------------------------------------- referrals & commissions */
+$router->get('/referrals',                        [App\Controllers\ReferralsController::class, 'index']);
+$router->get('/referrals/referrers',              [App\Controllers\ReferralsController::class, 'referrers']);
+$router->get('/referrals/referrers/{id}',         [App\Controllers\ReferralsController::class, 'show']);
+$router->get('/referrals/withdrawals',            [App\Controllers\ReferralsController::class, 'withdrawals']);
+$router->get('/referrals-export',                 [App\Controllers\ReferralsController::class, 'exportCsv']);
+$router->post('/referrals/settings',              [App\Controllers\ReferralsController::class, 'saveSettings']);
+$router->post('/referrals/referrers/{id}/status', [App\Controllers\ReferralsController::class, 'setStatus']);
+$router->post('/referrals/referrers/{id}/adjust', [App\Controllers\ReferralsController::class, 'adjust']);
+$router->post('/referrals/withdrawals/{id}/resolve', [App\Controllers\ReferralsController::class, 'resolveWithdrawal']);
 
 /* --------------------------------------------------------------- payments */
 $router->get('/payments',            [App\Controllers\PaymentsController::class, 'index']);

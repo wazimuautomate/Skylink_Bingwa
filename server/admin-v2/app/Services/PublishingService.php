@@ -96,7 +96,6 @@ final class PublishingService
             'offers'        => self::buildOffers(),
             'categories'    => self::buildCategories(),
             'billboards'    => self::buildBillboards(),
-            'notifications' => self::buildNotifications(),
             'support'       => self::buildSupport(),
             'appConfig'     => self::buildAppConfig(),
             'featureFlags'  => self::buildFeatureFlags(),
@@ -200,77 +199,6 @@ final class PublishingService
         }
         return $out;
     }
-
-    /* ----------------------------------------------------------- notifications */
-
-    /**
-     * Notification RULES, not sends. The app decides whether local conditions (trigger,
-     * day, time window, cooldown, quiet hours) allow a message, then picks one of the
-     * wording variations at random and substitutes {{variables}} on-device.
-     */
-    private static function buildNotifications(): array
-    {
-        $rows = Database::fetchAll(
-            "SELECT * FROM " . Database::table('notification_campaigns') . "
-              WHERE enabled = 1 AND status = 'active'
-              ORDER BY category, id"
-        );
-        if ($rows === []) {
-            return [];
-        }
-        $variationsByCampaign = [];
-        foreach (Database::fetchAll(
-            "SELECT * FROM " . Database::table('notification_variations') . "
-              WHERE enabled = 1 ORDER BY campaign_id, sort_order, id"
-        ) as $v) {
-            $variationsByCampaign[(int) $v['campaign_id']][] = [
-                'title' => (string) $v['title'],
-                'body'  => (string) $v['body'],
-            ];
-        }
-
-        $out = [];
-        foreach ($rows as $r) {
-            $variations = $variationsByCampaign[(int) $r['id']] ?? [];
-            if ($variations === []) {
-                // A campaign with no variation falls back to its own title/body so it is
-                // never published as an empty notification.
-                if (trim((string) $r['title']) === '' && trim((string) $r['body']) === '') {
-                    continue;
-                }
-                $variations = [['title' => (string) $r['title'], 'body' => (string) $r['body']]];
-            }
-            $days = array_values(array_filter(array_map(
-                static fn($d) => (int) trim((string) $d),
-                explode(',', (string) $r['days_of_week'])
-            ), static fn($d) => $d >= 1 && $d <= 7));
-
-            $out[] = [
-                'id'            => (int) $r['id'],
-                'name'          => (string) $r['name'],
-                'category'      => (string) $r['category'],
-                'trigger'       => (string) $r['trigger_type'],
-                'triggerEvent'  => (string) $r['trigger_event'],
-                'priority'      => (string) $r['priority'],
-                'variations'    => $variations,
-                'deepLink'      => (string) $r['deep_link'],
-                'linkedOfferId' => $r['linked_offer_id'],
-                'startsOn'      => $r['starts_on'] ?: null,
-                'endsOn'        => $r['ends_on'] ?: null,
-                'daysOfWeek'    => $days,                       // [] = every day. Mon = 1.
-                'timeStart'     => (string) $r['allowed_time_start'],
-                'timeEnd'       => (string) $r['allowed_time_end'],
-                'cooldownMinutes'        => (int) $r['cooldown_minutes'],
-                'frequencyCap'           => (int) $r['frequency_cap'],
-                'respectQuietHours'      => (int) $r['respect_quiet_hours'] === 1,
-                'suppressRecentPurchase' => (int) $r['suppress_recent_purchase'] === 1,
-                'expiresAt'     => self::iso($r['expires_at']),
-            ];
-        }
-        return $out;
-    }
-
-    /* ------------------------------------------------ categories / feature flags */
 
     private static function buildCategories(): array
     {
@@ -723,17 +651,6 @@ final class PublishingService
             static fn(array $b): string => trim((string) ($b['headline'] ?? '')) !== ''
                 ? (string) $b['headline']
                 : ('Billboard #' . (string) ($b['id'] ?? ''))
-        );
-
-        self::diffList(
-            $items,
-            'notifications',
-            'notification',
-            $old['notifications'] ?? [],
-            $new['notifications'] ?? [],
-            static fn(array $n): string => trim((string) ($n['name'] ?? '')) !== ''
-                ? (string) $n['name']
-                : ('Notification #' . (string) ($n['id'] ?? ''))
         );
 
         // Singletons: one item whose `fields` are the changed keys inside the object.

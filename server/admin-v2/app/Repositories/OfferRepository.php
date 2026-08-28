@@ -95,15 +95,17 @@ final class OfferRepository
                     (offer_id, category, name, price, validity, band, daily_rule, max_per_day,
                      available_from, available_to,
                      commercial_tag, offline_eligible, restrictions, status, starts_at, ends_at, sort_hint,
+                     commission_bps, margin_bps,
                      row_version, created_at, updated_at, updated_by)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), ?)",
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), ?)",
                 [
                     $data['offer_id'], $data['category'], $data['name'], (int) $data['price'], $data['validity'],
                     $data['band'], $data['daily_rule'], $data['max_per_day'],
                     $data['available_from'] ?? null, $data['available_to'] ?? null,
                     $data['commercial_tag'],
                     $data['offline_eligible'], $data['restrictions'], $data['status'], $data['starts_at'],
-                    $data['ends_at'], (int) $data['sort_hint'], $actor,
+                    $data['ends_at'], (int) $data['sort_hint'],
+                    $data['commission_bps'] ?? null, $data['margin_bps'] ?? null, $actor,
                 ]
             );
             self::writeRevision($data['offer_id'], 'create');
@@ -116,6 +118,7 @@ final class OfferRepository
                 category=?, name=?, price=?, validity=?, band=?, daily_rule=?, max_per_day=?,
                 available_from=?, available_to=?,
                 commercial_tag=?, offline_eligible=?, restrictions=?, status=?, starts_at=?, ends_at=?, sort_hint=?,
+                commission_bps=?, margin_bps=?,
                 row_version = row_version + 1, updated_at = UTC_TIMESTAMP(), updated_by = ?
              WHERE offer_id = ? AND row_version = ?",
             [
@@ -124,6 +127,7 @@ final class OfferRepository
                 $data['available_from'] ?? null, $data['available_to'] ?? null,
                 $data['commercial_tag'], $data['offline_eligible'],
                 $data['restrictions'], $data['status'], $data['starts_at'], $data['ends_at'], (int) $data['sort_hint'],
+                $data['commission_bps'] ?? null, $data['margin_bps'] ?? null,
                 $actor, $data['offer_id'], $expectedVersion,
             ]
         );

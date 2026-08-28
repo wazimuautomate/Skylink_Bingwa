@@ -29,7 +29,7 @@ use Throwable;
 final class PushController extends Controller
 {
     /** Screens the app can deep-link to when the notification is tapped. */
-    private const ROUTES = ['notifications', 'home', 'offers', 'activity', 'help'];
+    private const ROUTES = ['notifications', 'home', 'offers', 'activity', 'help', 'referrals'];
 
     private function actor(): string
     {

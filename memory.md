@@ -1960,3 +1960,108 @@ destinations.
   session could infer from the bundled dependency list (e.g. a stale bundle still
   "active" in a Play track's App Bundle Explorer — deactivate it there) and needs the
   actual Play Console SDK Console screen read directly.
+
+---
+
+## 2026-08-28 — v1.0.17: referral & commission system; scheduled-notifications module removed
+
+- **Instruction:** Build the referral/commission feature brainstormed earlier in the
+  session. Owner's explicit decisions: code format `SK` + 3 digits + 1 letter
+  (`SK391R`); Ksh 10 to the code owner when someone joins with their code; per-offer
+  commission % with a global default; Ksh 200 minimum withdrawal with the business
+  absorbing the B2C charge; lazy OTP (first withdrawal, not onboarding); very strict
+  anti-fraud, specifically against onboard-with-another-SIM → redeem own code →
+  uninstall → reinstall → repeat. Dedicated Earn page behind a top-right icon (NOT
+  squeezed into the five-item bottom nav). Also: remove the admin's scheduled
+  notifications entirely (UI, backend, database) since Instant Push supersedes it.
+- **Scope override recorded:** `docs/CLAUDE.md` §2 still lists referrals under both
+  "locked version 1 facts" and "explicit non-goals". The owner's current instruction
+  wins per §1's hierarchy, but **those documents are not yet amended** — see Risks.
+- **Design doc:** `docs/REFERRAL_COMMISSION_SPEC.md` (written earlier this session,
+  from the brainstorm). The build follows it, with two owner-driven deltas: the signup
+  bonus is now IN (spec §1 recorded it as out), and the code format is fixed to
+  `SK###X` rather than 6-char Crockford base32 (24,000-code space — noted in the code).
+
+### What was built
+
+- **Server (`server/mybingwa-api/`)**: `referrals.php` (ledger primitives, code
+  generation, attribution, accrual, outbox, bearer-token auth), `b2c.php`, `fcm.php`
+  (data-only, matching `FcmService::envelope()` — a `notification` block would bypass
+  `onMessageReceived` and be dropped by Android 8+ on a non-existent channel),
+  `check_referral_code.php`, `referral_summary.php`, `otp_request.php`,
+  `otp_verify.php`, `withdraw.php`, `b2c_result.php`, `b2c_timeout.php`,
+  `cron_referrals.php` (6 tasks, each behind a MySQL `GET_LOCK`).
+  `register_user.php` and `callback.php` extended; `.htaccess` now blocks the three
+  new library files.
+- **Migrations:** `022_referrals.sql` (10 tables + `commission_bps`/`margin_bps` on
+  `{p}offers` + `referral_code`/`device_hash` on `{p}customers` + 15 settings rows),
+  `023_drop_notifications.sql`.
+- **Admin (`server/admin-v2/`)**: `ReferralsController` + `ReferralRepository` + four
+  views (overview/referrers/detail/withdrawals), routes, sidebar entry, RBAC page key
+  `referrals`, commission+margin fields on the offer form with a validator that refuses
+  commission > margin.
+- **App:** `core/device/DeviceIdentity.kt` (ANDROID_ID), `data/referral/` (store, API,
+  repository), `feature/referral/ReferralScreen.kt`, referral field in onboarding,
+  gift icon in `SkylinkBingwaTopAppBar`, `referrals` nav route + push deep-link.
+
+### Key correctness decisions (do not regress these)
+
+- Accrual hooks the existing `$weConfirmed` branch in `callback.php` — that flag is the
+  single observation of `PAYMENT_REQUESTED → PAYMENT_CONFIRMED`, so the accrual inherits
+  its exactly-once guarantee. The ledger's `UNIQUE(idempotency_key)` is the second,
+  independent guard. Attribution follows the **payer**, not the recipient.
+- `UNKNOWN` withdrawals are **never** auto-refunded and **never** re-submitted. Only
+  Daraja's `TransactionStatus` resolves them. `OriginatorConversationID` is ours,
+  persisted before the outbound call, and encodes the withdrawal id (`SKB-<id>-…`,
+  queries `SKBQ-<id>-…`) so a result callback can always find its row.
+- The anti-farming spine is **one referral redemption per handset, for life**
+  (`mb_device_registry.referral_redeemed`), because ANDROID_ID survives reinstall. The
+  Ksh 10 bonus additionally does not mature until the referee's first confirmed
+  purchase (`referral_bonus_requires_purchase`, default on) — a farm must generate real
+  revenue to unlock it. Attribution is refused outright when no device id is available.
+- Ships **inert**: `referral_commission_bps = 0` and `referral_payouts_enabled = 0`.
+- `commission_bps`/`margin_bps` live on **`mb_offers`** (admin's authoritative table),
+  not the legacy unprefixed `offers` fallback. Caught and fixed mid-build; deliberately
+  NOT carried into the published snapshot, since the rate does not affect what a
+  customer is charged and should apply without a publish cycle.
+
+### Verification
+
+- `./gradlew --offline compileDirectDebugKotlin` — BUILD SUCCESSFUL.
+- `./gradlew lintDirectDebug` — BUILD SUCCESSFUL, clean.
+- `./gradlew testDirectDebugUnitTest` — 405 tests, 399 pass, 6 fail.
+  **All 6 are the known `OnboardingPermissionComposeTest` Robolectric/Compose-semantics
+  gap first recorded under v1.0.16.** Re-confirmed independently this session by
+  checking out `990325e` into a clean `git worktree` and running that class there: it
+  fails identically on untouched HEAD. Not caused by, and not fixed by, this change.
+- `./gradlew --offline assembleDirectDebug` — BUILD SUCCESSFUL; APK staged at
+  `release/Skylink-Bingwa-v1.0.17/Skylink-Bingwa-v1.0.17-direct-debug.apk`
+  (sha256 `bbb81f477434182ca119b15f73ada16b681b1f55bc082dac677bb5e73843d16d`).
+- **PHP is NOT verified locally** — this machine has no PHP runtime (same as noted in
+  `server-checks.yml`). The ~15 new/modified PHP files have been read carefully but
+  only `server-checks.yml` (PHP 8.1 `php -l` over every file + `tests/run.php`) will
+  actually parse them. **Push to a branch and read that workflow before deploying.**
+
+### Risks / open items
+
+- **PHP lint not run locally.** See above. This is the single biggest unverified item.
+- **Docs not yet amended:** `CLAUDE.md` §2 non-goals, `docs/Plan.md`, `docs/design.md`
+  (Earn screen), `docs/PRIVACY.md` (referral graph + payout records are personal-data
+  processing under the DPA 2019, and a hashed device id is now stored). Listed in
+  `docs/REFERRAL_COMMISSION_SPEC.md` §13.
+- **B2C Go-Live is a lead-time item** the owner has not started: separate Daraja
+  product, own shortcode, initiator + SecurityCredential, and a **separately funded
+  utility account** (Till/Paybill collections do not top it up).
+- **No automated tests for the money paths yet.** The spec's §12 matrix (concurrent
+  accrual, replayed callback, double withdraw, timeout→UNKNOWN→reconcile) is written
+  but unimplemented. Worth doing before payouts are enabled for real customers.
+- The release APK in `release/Skylink-Bingwa-v1.0.17/` is **debug-signed** (installs as
+  `com.bingwasokoni.debug`, "Skylink Bingwa Dev"). The signed customer build must come
+  from `release.yml` on tag `v1.0.17`; no keystore exists locally.
+
+### Next
+
+- Owner follows `docs/REFERRAL_DEPLOYMENT_GUIDE.md`: deploy → config → migrations →
+  **six cron jobs** → record real per-offer margins → set rates → test earning and the
+  reinstall-farming refusal on two handsets → only then B2C Go-Live and the payout
+  kill switch.

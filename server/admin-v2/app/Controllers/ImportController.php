@@ -1,6 +1,6 @@
 <?php
 /**
- * JSON import for billboards and notifications — paste it or upload a file.
+ * JSON import for billboard adverts - paste it or upload a file.
  *
  * Everything imported lands as a DRAFT, so an import can never put an advert or a
  * message in front of a customer on its own: the operator opens each one in the
@@ -20,7 +20,6 @@ use App\Core\Database;
 use App\Core\Flash;
 use App\Core\Request;
 use App\Services\JsonImporter;
-use App\Services\NotificationService;
 
 final class ImportController extends Controller
 {
@@ -85,67 +84,6 @@ final class ImportController extends Controller
         $this->redirect('/billboards');
     }
 
-    /* ---------------------------------------------------------- notifications */
-
-    public function notificationsForm(Request $request): void
-    {
-        $this->guard('notifications.create');
-        if ($request->get('sample') !== null) {
-            self::downloadSample('skylinkbingwa-notifications-template.json', JsonImporter::notificationSample());
-        }
-        $this->view('import/index', [
-            'activeNav' => 'notifications',
-            'pageTitle' => 'Import notifications',
-            'kind' => 'notifications',
-            'heading' => 'Import notifications from JSON',
-            'backUrl' => '/notifications',
-            'postUrl' => '/notifications/import',
-            'sampleUrl' => '/notifications/import?sample=1',
-            'sample' => JsonImporter::notificationSample(),
-            'fields' => self::notificationFieldHelp(),
-        ]);
-    }
-
-    public function importNotifications(Request $request): void
-    {
-        Csrf::check($request);
-        $this->guard('notifications.create');
-
-        $payload = JsonImporter::readPayload($_FILES['file'] ?? null, (string) $request->post('json', ''));
-        if (!$payload['ok']) {
-            Flash::error($payload['error']);
-            $this->redirect('/notifications/import');
-        }
-        $decoded = JsonImporter::decode($payload['raw'], 'notifications');
-        if (!$decoded['ok']) {
-            Flash::error($decoded['error']);
-            $this->redirect('/notifications/import');
-        }
-
-        $result = JsonImporter::validateNotifications(
-            $decoded['items'],
-            NotificationService::categories(),
-            NotificationService::triggers(),
-            NotificationService::variables()
-        );
-        if (!$result['ok']) {
-            Flash::error('Nothing was imported. ' . implode(' ', array_slice($result['errors'], 0, 6)));
-            $this->redirect('/notifications/import');
-        }
-
-        $written = JsonImporter::insertNotifications($result['rows']);
-        Audit::log([
-            'action' => 'notification.import',
-            'entity_type' => 'notification',
-            'entity_id' => 'import',
-            'after' => ['imported' => $written, 'names' => array_column(array_column($result['rows'], 'campaign'), 'name')],
-        ]);
-        Flash::success(
-            ($written === 1 ? '1 notification' : "{$written} notifications")
-            . ' imported as drafts. Review each one, then publish to push them to the app.'
-        );
-        $this->redirect('/notifications');
-    }
 
     /* ------------------------------------------------------------------ helpers */
 
@@ -180,32 +118,4 @@ final class ImportController extends Controller
         ];
     }
 
-    private static function notificationFieldHelp(): array
-    {
-        $categories = implode(', ', array_keys(NotificationService::categories()));
-        $triggers = implode(', ', array_keys(NotificationService::triggers()));
-        $variables = array_keys(NotificationService::variables());
-        $variableList = $variables === []
-            ? 'none are configured yet'
-            : implode(', ', array_map(static fn($k) => '{{' . $k . '}}', $variables));
-
-        return [
-            ['name', 'required', 'Your own label for the message. Never shown to a customer.'],
-            ['category', 'required', 'One of: ' . ($categories ?: 'none configured yet') . '.'],
-            ['triggerType', 'required', 'One of: ' . ($triggers ?: 'none configured yet') . '.'],
-            ['triggerEvent', 'sometimes', 'Only for triggers that react to a phone message, e.g. low_data.'],
-            ['wordings', 'required', 'A list of { "title", "body" } pairs. One is picked at random so the message never reads the same twice.'],
-            ['', '', 'Supported variables: ' . $variableList . '.'],
-            ['priority', 'optional', 'low, normal (default) or high.'],
-            ['allowedTimeStart / allowedTimeEnd', 'optional', '"HH:MM" Nairobi. Blank = any time inside quiet hours.'],
-            ['daysOfWeek', 'optional', 'e.g. ["mon","tue"]. Blank = every day.'],
-            ['startsOn / endsOn', 'optional', '"YYYY-MM-DD".'],
-            ['frequencyCap', 'optional', 'Max times per customer per day. Defaults to 1.'],
-            ['cooldownMinutes', 'optional', 'Minimum gap between two showings. Max ' . NotificationService::MAX_COOLDOWN_MINUTES . ' (7 days).'],
-            ['respectQuietHours', 'optional', 'true (default) keeps it out of the night.'],
-            ['suppressRecentPurchase', 'optional', 'true (default) stays quiet just after someone buys.'],
-            ['deepLink', 'optional', 'Where a tap lands: home, offers, activity, help, settings.'],
-            ['enabled', 'optional', 'true (default) or false.'],
-        ];
-    }
 }

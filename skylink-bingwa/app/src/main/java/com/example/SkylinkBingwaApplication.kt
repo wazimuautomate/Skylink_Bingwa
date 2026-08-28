@@ -28,8 +28,6 @@ import com.example.data.payment.PaymentGatewayProvider
 import com.example.data.payment.UnavailablePaymentGateway
 import com.example.data.persistence.LocalStore
 import com.example.data.remote.AndroidRemoteCustomerSource
-import com.example.data.remote.AndroidRemoteNotificationSource
-import com.example.data.remote.AndroidRemoteNotificationTemplateSource
 import com.example.data.remote.AndroidRemoteSyncManifestSource
 import com.example.data.sync.CatalogueSyncWorker
 import com.example.data.sync.EngagementNotificationWorker
@@ -220,7 +218,10 @@ class SkylinkBingwaApplication : Application(), SyncOrchestratorProvider {
                 AndroidRemoteCustomerSource(
                     baseUrl = baseUrl,
                     appKey = appKey,
-                    enableLogging = BuildConfig.DEBUG
+                    enableLogging = BuildConfig.DEBUG,
+                    // Lets registration carry the referral code typed at onboarding and
+                    // the handset id the server's anti-farming rules depend on.
+                    context = applicationContext
                 )
             } else {
                 null
@@ -237,29 +238,15 @@ class SkylinkBingwaApplication : Application(), SyncOrchestratorProvider {
             } else {
                 null
             },
-            // Notification wording and admin-published messages. These are what make
-            // the app teachable from the dashboard without an app release. No base URL
-            // → left null, and the app runs on its in-APK seeds.
-            contentSyncers = if (hasBaseUrl) {
-                val baseUrl = BuildConfig.PAYMENTS_BASE_URL
-                val appKey = BuildConfig.PAYMENTS_APP_KEY
-                ContentSyncers(
-                    templateProvider = notificationTemplateProvider,
-                    templateSource = AndroidRemoteNotificationTemplateSource(
-                        baseUrl = baseUrl,
-                        appKey = appKey,
-                        enableLogging = BuildConfig.DEBUG
-                    ),
-                    notificationStore = remoteNotificationStore,
-                    notificationSource = AndroidRemoteNotificationSource(
-                        baseUrl = baseUrl,
-                        appKey = appKey,
-                        enableLogging = BuildConfig.DEBUG
-                    )
-                )
-            } else {
-                null
-            },
+            // Notification wording and in-app messages now come entirely from the
+            // seeds compiled into the APK plus instant push (FCM). The admin's
+            // scheduled-notifications module — and the two endpoints that served it —
+            // were retired in v1.0.17, so the remote sources are deliberately absent:
+            // the stores stay, and ContentSyncers degrades each sync to a no-op.
+            contentSyncers = ContentSyncers(
+                templateProvider = notificationTemplateProvider,
+                notificationStore = remoteNotificationStore
+            ),
             // Real on-device persistence: name, profile, favourites, Activity, synced
             // offers, notifications and any in-flight order survive process death.
             localStore = LocalStore(applicationContext)

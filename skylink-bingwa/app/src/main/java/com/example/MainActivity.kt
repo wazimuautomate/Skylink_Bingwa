@@ -45,6 +45,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.core.model.AppThemeSetting
 import com.example.core.model.OfferCategory
 import com.example.core.model.OfferItem
+import com.example.data.referral.ReferralRepository
+import com.example.feature.referral.ReferralScreen
 import com.example.core.model.offerAvailabilityAt
 import com.example.core.model.Promotion
 import com.example.core.model.PromotionClickAction
@@ -431,6 +433,13 @@ fun SkylinkBingwaApp(
     val recentRecipients by repository.recentRecipients.collectAsState()
     val appConfig by repository.appConfig.collectAsState()
 
+    // Refer & Earn owns its own repository rather than joining the main one: it is
+    // the only feature whose state is server-authoritative (a balance the phone must
+    // never compute) and the only one holding a credential that can move money.
+    val referralRepository = remember { ReferralRepository(context) }
+    val referralState by referralRepository.state.collectAsState()
+    val referralWithdraw by referralRepository.withdraw.collectAsState()
+
     // Hoisted so list position and filters survive tab switches (design.md §14.4).
     val homeListState = rememberLazyListState()
     val offersListState = rememberLazyListState()
@@ -473,6 +482,7 @@ fun SkylinkBingwaApp(
                 }
             }
             "notifications" -> showNotifications = true
+            "referrals" -> navController.navigate("referrals") { launchSingleTop = true }
             else -> { /* unknown route — ignore */ }
         }
         onConsumeDeepLink()
@@ -622,6 +632,7 @@ fun SkylinkBingwaApp(
                 startDestination = if (startOnboarding) "onboarding" else "home"
             ) {
                 composable("onboarding") {
+                    val onboardingScope = rememberCoroutineScope()
                     OnboardingScreen(
                         onCompleteOnboarding = { name, phone ->
                             repository.updateProfile(name, phone)
@@ -644,7 +655,14 @@ fun SkylinkBingwaApp(
                         notificationsGranted = notificationsAllowed ||
                             Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU,
                         onOpenAppSettings = { openAppSettings(context) },
-                        onExitApp = exitApp
+                        onExitApp = exitApp,
+                        // Held locally until registration reaches the server, because
+                        // onboarding can complete offline and the referrer would
+                        // otherwise lose their credit.
+                        onReferralCodeEntered = { code ->
+                            onboardingScope.launch { referralRepository.rememberPendingCode(code) }
+                        },
+                        onCheckReferralCode = { code -> referralRepository.checkCode(code) }
                     )
                 }
 
@@ -668,6 +686,7 @@ fun SkylinkBingwaApp(
                         onUndoFavourite = onUndoFavourite,
                         onPromotionAction = onPromotionAction,
                         onNotifClick = { showNotifications = true },
+                        onReferralClick = { navController.navigate("referrals") },
                         onOfflineClick = {
                             navController.navigate("offers") {
                                 popUpTo("home") { saveState = true }
@@ -719,6 +738,32 @@ fun SkylinkBingwaApp(
                         prefilledRef = prefilledReportRef,
                         appConfig = appConfig,
                         onOpenSettings = { navController.navigate("settings") }
+                    )
+                }
+
+                composable("referrals") {
+                    val scope = rememberCoroutineScope()
+                    val msisdn = userProfile.primaryNumber
+
+                    // Refresh on entry, and again whenever the number changes. The
+                    // screen is worthless stale: a balance is the whole point.
+                    LaunchedEffect(msisdn) {
+                        if (msisdn.isNotBlank()) referralRepository.refresh(msisdn)
+                    }
+
+                    ReferralScreen(
+                        state = referralState,
+                        withdrawState = referralWithdraw,
+                        onBack = { navController.popBackStack() },
+                        onRefresh = { scope.launch { referralRepository.refresh(msisdn) } },
+                        onWithdraw = { scope.launch { referralRepository.beginWithdrawal(msisdn) } },
+                        onSubmitOtp = { code -> scope.launch { referralRepository.verifyOtp(msisdn, code) } },
+                        onResendOtp = { scope.launch { referralRepository.requestOtp(msisdn) } },
+                        onDismissWithdraw = {
+                            referralRepository.dismissWithdrawal()
+                            // A finished withdrawal changes every figure on the page.
+                            scope.launch { referralRepository.refresh(msisdn) }
+                        }
                     )
                 }
 
