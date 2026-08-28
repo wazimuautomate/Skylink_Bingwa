@@ -668,7 +668,72 @@ Planning, review-only and diagnostic requests do not authorize a merge.
 
 ---
 
-## 14. Documentation discipline
+## 14. Server deployment (cPanel)
+
+The PHP server (`server/mybingwa-api/`, `server/admin-v2/`) does not deploy the
+way the Android app does. There is no app-store review, no APK artifact — code
+reaches the live server by FTP, and Claude runs that deploy directly.
+Established practice for server-side commits is to push straight to `main`
+(no feature branch, no PR) — the same precedent set for prior server work
+recorded in `memory.md`. This does not relax §13 for the Android app; it
+reflects how this repo has always shipped its server side.
+
+### The mechanism
+
+`.github/workflows/deploy-cpanel.yml` — a manual (`workflow_dispatch`) GitHub
+Actions workflow with a `dry_run` boolean input (default `true`). It runs
+`SamKirkland/FTP-Deploy-Action` twice: once for `server/mybingwa-api/` (to the
+FTP account's root) and once for `server/admin-v2/` (to an `admin/`
+subfolder). `dangerous-clean-slate: false` always — it will add and update
+files but never delete something absent from a fresh sync-state on its own.
+Real credentials live only in the `FTP_HOST` / `FTP_USERNAME` / `FTP_PASSWORD`
+GitHub Actions secrets, never in this repository. `config.php` and
+`config/config.php` are always excluded from the transfer — those are hand-set
+on the server once and never overwritten by this workflow.
+
+**Claude runs this deploy itself** — via `gh workflow run "Deploy to cPanel
+(FTP)"` and `gh run watch` — whenever server-side changes need to reach
+production. The user does not need to open cPanel's File Manager and upload
+files by hand; that manual path is retired in favour of this pipeline.
+
+### The required sequence, every time — do not skip steps
+
+1. `gh workflow run "Deploy to cPanel (FTP)" -f dry_run=true`, then
+   `gh run watch <id> --exit-status`.
+2. Read the actual log (`gh run view --job=<id> --log`), not just the
+   green/red status. Confirm the expected files appear in the diff and there
+   are no connection or transport errors.
+3. Only then `gh workflow run "Deploy to cPanel (FTP)" -f dry_run=false`.
+4. **Independently verify against the live domain with a real HTTP request**
+   — `curl -sD -` against a file known to be new. A `200`/`401`/whatever the
+   endpoint's own logic returns, WITH an `X-Powered-By: PHP` header, means PHP
+   actually executed that file. A bare `404` with no `X-Powered-By` means the
+   web server never found it — regardless of what the deploy log or CI status
+   claims. FTP-Deploy-Action reporting "N files changed, 0 errors" is **not**
+   proof of correct placement — see the incident below.
+5. Only report a deploy as done once step 4 has actually passed. Trusting
+   green CI status alone was the exact mistake that cost most of a session on
+   2026-08-28 (see `deploy-cpanel-ftp-target` in Claude's memory, and the
+   commit history around that date) — the deploy target was wrong for three
+   consecutive attempts while every FTP transfer reported clean success.
+
+### The verified deploy target
+
+The live site is `https://mybingwa.blazetechscope.com` (admin at `/admin/`).
+Its cPanel Document Root is a folder literally named `mybingwa.skyscope.co.ke`
+— not a real, resolvable domain, just a leftover folder name. A
+similarly-named `mybingwa.bingwasokonidata.co.ke` also exists on the same
+cPanel account as an unrelated, unused domain — a red herring if it ever
+resurfaces. If the FTP secrets ever need to be rotated or recreated, cPanel's
+"Add FTP Account" `Directory` field does not reliably re-populate when the
+`Domain` dropdown changes, especially across repeated attempts in the same
+browser tab — clear and manually retype it rather than trusting the prefill,
+then confirm via the FTP Accounts *list* view (not the creation form) before
+handing new credentials over.
+
+---
+
+## 15. Documentation discipline
 
 ### `memory.md`
 
@@ -726,7 +791,7 @@ do not invent a changelog change that did not happen.
 
 ---
 
-## 15. Definition of done
+## 16. Definition of done
 
 A task is done only when:
 
@@ -750,7 +815,7 @@ If any item is not complete, report the work as partial or blocked.
 
 ---
 
-## 16. Final prohibitions
+## 17. Final prohibitions
 
 Never:
 

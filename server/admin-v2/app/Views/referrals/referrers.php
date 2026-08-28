@@ -37,7 +37,11 @@ $badge = static function (string $status): string {
     <div class="sub"><?= number_format((int) $total) ?> customer(s) with a referral code.</div>
   </div>
   <div class="page-head__actions">
-    <a class="btn btn--ghost" href="<?= e(url('/referrals')) ?>"><?= icon('chevron', 18) ?> Overview</a>
+    <div class="seg">
+      <a href="<?= e(url('/referrals')) ?>">Overview</a>
+      <a class="is-active" href="<?= e(url('/referrals/referrers')) ?>">Referrers</a>
+      <a href="<?= e(url('/referrals/withdrawals')) ?>">Withdrawals</a>
+    </div>
     <a class="btn btn--ghost" href="<?= e(url('/referrals-export' . ($queryState ? '?' . http_build_query($queryState) : ''))) ?>">
       <?= icon('download', 18) ?> Export CSV
     </a>
@@ -45,7 +49,7 @@ $badge = static function (string $status): string {
 </div>
 
 <div class="card">
-  <form class="pay-filters" method="get" action="<?= e(url('/referrals/referrers')) ?>">
+  <form class="filters" method="get" action="<?= e(url('/referrals/referrers')) ?>">
     <div class="field pay-search">
       <label for="r-q">Search</label>
       <input id="r-q" type="search" name="q" value="<?= e($filters['q']) ?>" placeholder="Name, number or code (SK391R)">

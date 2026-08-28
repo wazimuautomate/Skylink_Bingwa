@@ -34,7 +34,11 @@ $statusMeta = [
     <div class="sub"><?= number_format((int) $total) ?> payout request(s).</div>
   </div>
   <div class="page-head__actions">
-    <a class="btn btn--ghost" href="<?= e(url('/referrals')) ?>"><?= icon('chevron', 18) ?> Overview</a>
+    <div class="seg">
+      <a href="<?= e(url('/referrals')) ?>">Overview</a>
+      <a href="<?= e(url('/referrals/referrers')) ?>">Referrers</a>
+      <a class="is-active" href="<?= e(url('/referrals/withdrawals')) ?>">Withdrawals</a>
+    </div>
   </div>
 </div>
 
@@ -47,7 +51,7 @@ $statusMeta = [
 <?php endif; ?>
 
 <div class="card">
-  <form class="pay-filters" method="get" action="<?= e(url('/referrals/withdrawals')) ?>">
+  <form class="filters" method="get" action="<?= e(url('/referrals/withdrawals')) ?>">
     <div class="field pay-search">
       <label for="w-q">Search</label>
       <input id="w-q" type="search" name="q" value="<?= e($filters['q']) ?>" placeholder="Name, number or M-Pesa receipt">
