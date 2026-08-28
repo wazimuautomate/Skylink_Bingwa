@@ -10,6 +10,8 @@
 *.pem
 *.der
 *.key
+*.cer
+*.crt
 my-bingwa-b538e0f6c645.json
 google-services.json
 google-services*.json
