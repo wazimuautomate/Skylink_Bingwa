@@ -22,6 +22,12 @@ Sections used: `Added`, `Changed`, `Fixed`, `Removed`, `Security`, `Internal`
   Settings screen: it is now behind a collapsed "Danger zone" disclosure, and tapping
   it now asks for confirmation twice — a first dialog, then a second, starker one —
   before anything is deleted.
+- **Refresh feedback.** Every refresh button (Home, Offers, Help, Refer & Earn) now
+  reports through a Snackbar — "Updated", "Already up to date", or "Couldn't refresh"
+  — instead of just spinning and going quiet.
+- **Referral account status.** The Earn screen now shows a clear banner naming the
+  admin's own reason when an account is banned or blocked, sourced from a new
+  `accountStatusReason` field on `referral_summary.php`.
 
 ### Fixed
 
@@ -30,6 +36,10 @@ Sections used: `Added`, `Changed`, `Fixed`, `Removed`, `Security`, `Internal`
   visit even completes — previously nothing was shown until that call returned. If the
   call fails, the screen now says so ("Could not load your code — check your
   connection and tap refresh") instead of silently looking the same as "no code yet".
+- **OTP requests had no minimum spacing.** A double-tapped "resend" could burn most of
+  the hourly request budget in seconds. Added a one-minute minimum gap between
+  requests for the same number, on top of the existing 3-per-hour/10-per-day caps.
+  A nightly job also now purges OTP challenge rows a day past their expiry.
 
 ## [1.0.17] - 2026-08-28
 

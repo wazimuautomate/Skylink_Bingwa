@@ -10,7 +10,7 @@
 | `...apk.sha256` | Checksum for the above. |
 
 **This is not the customer release.** Built by the `Feature debug build` GitHub Actions
-workflow off commit `2d7a1a5`, the same way every debug test build should be — that
+workflow off commit `fb5f5ad`, the same way every debug test build should be — that
 workflow injects the real `PAYMENTS_APP_KEY`/`PAYMENTS_BASE_URL` repo secrets, which a
 plain local `./gradlew assembleDebug` cannot do. A build without the real app key
 still installs and looks fine, but every server call (registration, Refer & Earn,
@@ -52,6 +52,19 @@ through CI — carries the real key.
   behind a collapsed "Danger zone" row you have to tap to open, and clearing now asks
   for confirmation twice — a first dialog, then a second, starker one — before
   anything is deleted.
+- **Refresh now says what happened.** Every refresh button (Home, Offers, Help,
+  Refer & Earn) reports through a Snackbar — "Updated", "Already up to date", or
+  "Couldn't refresh — check your connection and try again" — instead of just
+  spinning and going quiet.
+- **Account status is visible on Refer & Earn.** If the admin bans an account or
+  blocks earning/payouts (with a reason), the Earn screen now shows a clear banner
+  with that reason. Previously a status change was invisible to the customer beyond
+  a generic "under review" note on the withdraw button.
+- **OTP hardening.** Requesting a new verification code now enforces a one-minute
+  minimum gap between requests (on top of the existing 3-per-hour, 10-per-day caps),
+  and a nightly job purges verification codes a day past their expiry. The codes
+  themselves were already self-built (not a third-party OTP service), hashed, and
+  single-use — this closes the "double-tap resend" gap and stops old rows piling up.
 
 ## Verification
 
