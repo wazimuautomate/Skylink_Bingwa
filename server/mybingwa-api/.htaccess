@@ -12,3 +12,10 @@
 <FilesMatch "\.(sql|md|log|json)$">
     Require all denied
 </FilesMatch>
+# The Daraja B2C public-key certificate (b2c_cert_path in config.php). Not a
+# secret in itself -- it's Safaricom's PUBLIC key -- but it only needs to be
+# read from local disk by openssl_pkey_get_public(), never fetched over HTTP,
+# so there's no reason to leave it web-reachable.
+<FilesMatch "\.(cer|pem|crt|der|key)$">
+    Require all denied
+</FilesMatch>
