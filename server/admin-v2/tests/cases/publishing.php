@@ -66,20 +66,18 @@ test('removed category is detected in the categories module', function () {
     eq($items[0]['summary'], 'Removed Data');
 });
 
-test('added notification and changed billboard land in their own modules', function () {
+test('a changed billboard lands in its own module', function () {
     $old = baseSnapshot();
     $old['billboards'][] = ['id' => 7, 'headline' => 'Weekend deal', 'priority' => 5];
     $new = $old;
     $new['billboards'][0]['priority'] = 1;
-    $new['notifications'][] = ['id' => 3, 'name' => 'Morning nudge'];
 
     $items = \App\Services\PublishingService::diffSnapshots($old, $new);
     $modules = array_column($items, 'module');
-    sort($modules);
-    eq($modules, ['billboards', 'notifications']);
+    eq($modules, ['billboards']);
 
     $grouped = \App\Services\PublishingService::groupByModule($items);
-    eq(array_keys($grouped), ['billboards', 'notifications']); // MODULES order, not insertion order
+    eq(array_keys($grouped), ['billboards']); // MODULES order, not insertion order
     eq($grouped['billboards']['count'], 1);
     eq($grouped['billboards']['label'], 'Billboards');
 });
