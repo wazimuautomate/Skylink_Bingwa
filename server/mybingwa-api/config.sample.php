@@ -80,16 +80,25 @@ $config = [
     //   https://mybingwa.blazetechscope.com/callback.php
     'callback_url' => 'https://PUT_YOUR_DOMAIN/callback.php',
 
+    // ---- SMS (HostPinnacle) -------------------------------------------------
+    // Every SMS this app sends — referral OTPs, referral "someone joined"
+    // texts, and the mocked fulfilment message below — goes through the one
+    // hostpinnacle_send_sms() function in lib.php. Auth is userid+password, NOT
+    // an apikey: verified live against a real account, the apikey-header mode
+    // failed on every value tried while userid+password worked immediately.
+    // Leave sms_userid empty to disable all SMS sending (referral OTP requests
+    // then fail cleanly with SMS_UNAVAILABLE rather than pretending to send).
+    'sms_api_url'   => 'https://smsportal.hostpinnacle.co.ke/SMSApi/send',
+    'sms_userid'    => 'PUT_YOUR_HOSTPINNACLE_USERID',
+    'sms_password'  => 'PUT_YOUR_HOSTPINNACLE_PASSWORD',
+    'sms_sender_id' => 'PUT_YOUR_REGISTERED_SENDER_ID',   // MUST be registered with HostPinnacle
+
     // ---- Buy-for-another fulfilment SMS -----------------------------------
     // On a CONFIRMED buy-for-another payment (payer != recipient) the server sends a
     // MOCKED M-Pesa SMS whose "received from" number is the RECIPIENT (not the payer),
     // to your fulfilment phone, so your operator loads the bundle for the right line.
-    // Uses the BlazeTechScope bulk-SMS API. Leave sms_api_key empty to disable.
     'fulfilment_phone' => 'PUT_FULFILMENT_PHONE',   // your operator's phone — receives the mocked SMS
     'business_name'    => 'SkylinkBingwa',                // shown UPPERCASED inside the SMS body
-    'sms_api_url'      => 'https://sms.blazetechscope.com/v1/bulksms',
-    'sms_api_key'      => 'PUT_YOUR_SMS_API_KEY',
-    'sms_sender_id'    => 'MYBINGWA',               // MUST be registered with the SMS provider
 
     // ---- Admin panel login (admin/ folder) --------------------------------
     // Used to sign in to the offers/settings/templates manager. Change these.
@@ -170,7 +179,7 @@ if (is_array($gw)) {
     foreach ([
         'transaction_type', 'business_shortcode', 'party_b', 'paybill_shortcode',
         'callback_url', 'fulfilment_phone', 'business_name', 'sms_api_url',
-        'sms_sender_id', 'sms_api_key', 'daraja_env',
+        'sms_sender_id', 'sms_userid', 'sms_password', 'daraja_env',
     ] as $k) {
         if (isset($gw[$k]) && $gw[$k] !== '') {
             $config[$k] = $gw[$k];

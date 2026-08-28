@@ -69,7 +69,7 @@ $gw = @include __DIR__ . '/../admin-v2/cutover/gateway_bridge.php';
 if (is_array($gw)) {
     foreach (['transaction_type','business_shortcode','party_b','paybill_shortcode',
               'callback_url','fulfilment_phone','business_name','sms_api_url',
-              'sms_sender_id','sms_api_key','daraja_env'] as $k) {
+              'sms_sender_id','sms_userid','sms_password','daraja_env'] as $k) {
         if (isset($gw[$k]) && $gw[$k] !== '') { $config[$k] = $gw[$k]; }
     }
 }

@@ -635,45 +635,98 @@ function build_mocked_mpesa_message(string $receipt, $amount, string $recipient,
 }
 
 /**
- * Send the mocked M-Pesa SMS to the fulfilment phone via the SMS provider. Best-effort:
- * returns true/false and NEVER throws, so a callback still returns 200 to Daraja even
- * if the SMS provider is down. Skips quietly when SMS is not configured.
+ * Send an SMS via HostPinnacle. The one function every SMS send in this app goes
+ * through — referral OTPs, referral notifications, and the mocked-M-Pesa fulfilment
+ * message below all call this rather than each building their own request.
+ *
+ * Verified live against a real HostPinnacle account (2026-08):
+ *
+ *  - Auth is the `userid` + `password` BODY fields, NOT the `apikey` header.
+ *    HostPinnacle's own docs present both as valid; on this account the
+ *    apikey-header mode failed on every value tried (including a freshly
+ *    portal-generated key) with an identical statusCode 216 "Invalid
+ *    credentials". userid+password authenticated immediately. If this ever
+ *    starts failing again, re-verify live rather than trusting either doc path.
+ *  - The request body is application/x-www-form-urlencoded, not JSON.
+ *  - `mobile` wants international format with NO leading '+' — 254712345678,
+ *    not 0712345678 and not +254712345678.
+ *  - A 200 HTTP response can still be a LOGICAL failure (the 216 case above is
+ *    one), so success is never decided from the HTTP code alone: delivered
+ *    means status is "success" (case-insensitive), OR statusCode is the
+ *    string "200", OR a non-blank transactionId/msgId is present. Any one of
+ *    these alone under-detects real successes on this gateway family.
+ *
+ * Never throws (best-effort — a callback must still return 200 to Daraja even
+ * if the SMS provider is down) and never logs the request: it carries the
+ * account password and the message text in plaintext.
  */
-function send_mocked_mpesa_sms(array $config, string $receipt, int $amount, string $recipient): bool
+function hostpinnacle_send_sms(array $config, string $mobile, string $message): bool
 {
-    $phone    = (string) ($config['fulfilment_phone'] ?? '');
-    $apiKey   = (string) ($config['sms_api_key'] ?? '');
-    $apiUrl   = (string) ($config['sms_api_url'] ?? 'https://sms.blazetechscope.com/v1/bulksms');
-    $senderId = (string) ($config['sms_sender_id'] ?? 'MYBINGWA');
-    $business = (string) ($config['business_name'] ?? 'SkylinkBingwa');
-    if ($phone === '' || $apiKey === '') {
+    $userId   = (string) ($config['sms_userid'] ?? '');
+    $password = (string) ($config['sms_password'] ?? '');
+    $senderId = (string) ($config['sms_sender_id'] ?? '');
+    $apiUrl   = (string) ($config['sms_api_url'] ?? 'https://smsportal.hostpinnacle.co.ke/SMSApi/send');
+    $mobile   = preg_replace('/\D/', '', $mobile) ?? '';
+
+    if ($userId === '' || $password === '' || $senderId === '' || $mobile === '') {
         return false;   // not configured yet → skip quietly (no fatal)
     }
 
-    $message = build_mocked_mpesa_message($receipt, $amount, $recipient, $business);
-
-    [$code, $json] = http_json(
-        'POST',
-        $apiUrl,
-        ['Content-Type: application/json', 'Accept: application/json'],
-        json_encode([
-            'message'   => $message,
-            'phones'    => [$phone],
-            'sender_id' => $senderId,
-            'api_key'   => $apiKey,
-        ])
-    );
-
-    // Treat common success shapes as success; otherwise false (caller ignores it).
-    if ($code >= 200 && $code < 300) {
-        if (!is_array($json)) {
-            return true;   // 2xx with a non-JSON body is still a send
-        }
-        return ($json['status'] ?? null) === 'success'
-            || ($json['success'] ?? null) === true
-            || (int) ($json['response-code'] ?? 0) === 200
-            || (int) ($json['data']['statusCode'] ?? 0) === 200
-            || true;       // 2xx is good enough; providers vary
+    try {
+        [$code, $json] = http_json(
+            'POST',
+            $apiUrl,
+            ['Content-Type: application/x-www-form-urlencoded'],
+            http_build_query([
+                'userid'         => $userId,
+                'password'       => $password,
+                'mobile'         => $mobile,
+                'msg'            => $message,
+                'senderid'       => $senderId,
+                'sendMethod'     => 'quick',
+                'msgType'        => 'text',
+                'duplicatecheck' => 'true',
+                'output'         => 'json',
+            ])
+        );
+    } catch (Throwable $e) {
+        error_log('[sms] HostPinnacle send failed (transport)');
+        return false;
     }
-    return false;
+
+    if ($code < 200 || $code >= 300 || !is_array($json)) {
+        return false;
+    }
+
+    $trackingId = trim((string) ($json['msgId'] ?? $json['transactionId'] ?? ''));
+    $delivered = strtolower((string) ($json['status'] ?? '')) === 'success'
+        || (string) ($json['statusCode'] ?? '') === '200'
+        || $trackingId !== '';
+
+    if (!$delivered) {
+        // The reason/message text carries no secret, so it is safe to log and is
+        // the only useful diagnostic when a 200 HTTP response hides a real failure.
+        error_log('[sms] HostPinnacle send not delivered: '
+            . (string) ($json['reason'] ?? $json['message'] ?? 'unknown'));
+    }
+
+    return $delivered;
+}
+
+/**
+ * Send the mocked M-Pesa SMS to the fulfilment phone. Best-effort: returns
+ * true/false and NEVER throws, so a callback still returns 200 to Daraja even if
+ * the SMS provider is down. Skips quietly when SMS is not configured.
+ */
+function send_mocked_mpesa_sms(array $config, string $receipt, int $amount, string $recipient): bool
+{
+    $phone = (string) ($config['fulfilment_phone'] ?? '');
+    if ($phone === '') {
+        return false;   // not configured yet → skip quietly (no fatal)
+    }
+
+    $business = (string) ($config['business_name'] ?? 'SkylinkBingwa');
+    $message  = build_mocked_mpesa_message($receipt, $amount, $recipient, $business);
+
+    return hostpinnacle_send_sms($config, $phone, $message);
 }

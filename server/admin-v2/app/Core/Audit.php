@@ -12,7 +12,8 @@ final class Audit
     /** Field names whose values are masked before being written to the diff. */
     private const SENSITIVE = [
         'password', 'password_hash', 'totp_secret', 'recovery_codes', 'passkey',
-        'consumer_secret', 'consumer_key', 'app_key', 'callback_secret', 'sms_api_key',
+        'consumer_secret', 'consumer_key', 'app_key', 'callback_secret',
+        'sms_userid', 'sms_password',
         'private_key', 'secret', 'db_pass',
     ];
 

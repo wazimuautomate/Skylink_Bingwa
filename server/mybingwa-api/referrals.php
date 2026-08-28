@@ -1132,32 +1132,10 @@ function ref_issue_token(PDO $pdo, int $customerId, ?string $deviceHash): string
  * returns false when SMS is unconfigured or the provider refuses, and the outbox
  * retries on its own schedule.
  */
+/** Thin wrapper so referral call sites read as referral code; see hostpinnacle_send_sms() in lib.php. */
 function ref_send_sms(array $config, string $msisdn, string $message): bool
 {
-    $apiKey   = (string) ($config['sms_api_key'] ?? '');
-    $apiUrl   = (string) ($config['sms_api_url'] ?? 'https://sms.blazetechscope.com/v1/bulksms');
-    $senderId = (string) ($config['sms_sender_id'] ?? 'MYBINGWA');
-    if ($apiKey === '' || trim($msisdn) === '') {
-        return false;
-    }
-
-    try {
-        [$code] = http_json(
-            'POST',
-            $apiUrl,
-            ['Content-Type: application/json', 'Accept: application/json'],
-            json_encode([
-                'message'   => $message,
-                'phones'    => [$msisdn],
-                'sender_id' => $senderId,
-                'api_key'   => $apiKey,
-            ])
-        );
-        return $code >= 200 && $code < 300;
-    } catch (Throwable $e) {
-        error_log('[referrals] sms failed: ' . $e->getMessage());
-        return false;
-    }
+    return hostpinnacle_send_sms($config, $msisdn, $message);
 }
 
 /* -------------------------------------------------------------------------- */

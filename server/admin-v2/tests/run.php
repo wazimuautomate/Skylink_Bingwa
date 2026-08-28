@@ -164,9 +164,9 @@ test('phone + receipt masking hide the middle', function () {
     eq(str_mask_receipt('QGH12345XY'), 'QGH*****XY');
 });
 test('audit masks sensitive fields', function () {
-    $masked = Audit::mask(['name' => 'Ann', 'sms_api_key' => 'secret']);
+    $masked = Audit::mask(['name' => 'Ann', 'sms_password' => 'secret']);
     eq($masked['name'], 'Ann');
-    eq($masked['sms_api_key'], '••••••');
+    eq($masked['sms_password'], '••••••');
 });
 
 function baseSnapshot(): array
