@@ -43,19 +43,26 @@ if (!$cust->fetch()) {
 
 // Rate limits, per number AND per source IP. Both matter: the per-number limit
 // stops one victim being spammed, the per-IP limit stops one attacker walking a
-// list of numbers and burning the SMS credit.
-$hourAgo = gmdate('Y-m-d H:i:s', time() - 3600);
-$dayAgo  = gmdate('Y-m-d H:i:s', time() - 86400);
+// list of numbers and burning the SMS credit. The one-minute spacing is separate
+// from the hourly/daily caps on purpose: without it, a customer double-tapping
+// "resend" burns most of their hourly budget in the first few seconds.
+$minuteAgo = gmdate('Y-m-d H:i:s', time() - 60);
+$hourAgo   = gmdate('Y-m-d H:i:s', time() - 3600);
+$dayAgo    = gmdate('Y-m-d H:i:s', time() - 86400);
 
 $perNumber = $pdo->prepare(
     'SELECT
+        SUM(created_at >= ?) AS last_minute,
         SUM(created_at >= ?) AS last_hour,
         SUM(created_at >= ?) AS last_day
        FROM ' . ref_t('otp_challenges') . ' WHERE msisdn = ?'
 );
-$perNumber->execute([$hourAgo, $dayAgo, $msisdn]);
-$counts = $perNumber->fetch() ?: ['last_hour' => 0, 'last_day' => 0];
+$perNumber->execute([$minuteAgo, $hourAgo, $dayAgo, $msisdn]);
+$counts = $perNumber->fetch() ?: ['last_minute' => 0, 'last_hour' => 0, 'last_day' => 0];
 
+if ((int) $counts['last_minute'] > 0) {
+    json_out(['status' => 'FAILED', 'errorCode' => 'TOO_SOON', 'retryAfter' => 60], 429);
+}
 if ((int) $counts['last_hour'] >= 3) {
     json_out(['status' => 'FAILED', 'errorCode' => 'TOO_MANY_REQUESTS', 'retryAfter' => 3600], 429);
 }

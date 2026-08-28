@@ -151,6 +151,23 @@ fun ReferralScreen(
 
             Spacer(Modifier.height(8.dp))
 
+            // The single most important thing on this screen when it is true: money
+            // stops moving and the customer needs to know exactly why, in their words.
+            if (state.accountStatus != "ACTIVE" && state.loadedOnce) {
+                val (title, tone) = when (state.accountStatus) {
+                    "BANNED" -> "Your account is banned" to MaterialTheme.colorScheme.error
+                    "EARN_BLOCKED" -> "Earning is paused on your account" to AccentGold
+                    "PAYOUT_BLOCKED" -> "Withdrawals are paused on your account" to AccentGold
+                    else -> "Your account needs attention" to AccentGold
+                }
+                NoticeCard(
+                    title = title,
+                    body = state.accountStatusReason.ifBlank { "Contact support for details." },
+                    tone = tone
+                )
+                Spacer(Modifier.height(16.dp))
+            }
+
             // A blank code because the server has not answered yet looks identical to
             // one because there is genuinely nothing to show, unless this says so.
             if (state.offline && state.code.isBlank() && state.loadedOnce) {

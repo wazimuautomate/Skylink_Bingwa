@@ -26,6 +26,7 @@ data class ReferralState(
     val verified: Boolean = false,
     val payoutMsisdn: String? = null,
     val accountStatus: String = "ACTIVE",
+    val accountStatusReason: String = "",
     val payoutsEnabled: Boolean = false,
     val frozen: Boolean = false,
     val hasInFlightWithdrawal: Boolean = false,
@@ -144,6 +145,7 @@ class ReferralRepository(context: Context) {
             verified = dto.verified,
             payoutMsisdn = dto.payoutMsisdn,
             accountStatus = dto.accountStatus,
+            accountStatusReason = dto.accountStatusReason,
             payoutsEnabled = dto.payoutsEnabled,
             frozen = dto.frozen,
             hasInFlightWithdrawal = dto.hasInFlightWithdrawal,
@@ -295,6 +297,7 @@ class ReferralRepository(context: Context) {
     /* ------------------------------------------------------------------ text */
 
     private fun otpError(code: String?): String = when (code) {
+        "TOO_SOON" -> "Please wait a minute before requesting another code."
         "TOO_MANY_REQUESTS" -> "Too many code requests. Please wait a while and try again."
         "SMS_UNAVAILABLE" -> "We could not send the SMS just now. Please try again in a few minutes."
         "UNKNOWN_CUSTOMER" -> "We do not have this number registered yet."

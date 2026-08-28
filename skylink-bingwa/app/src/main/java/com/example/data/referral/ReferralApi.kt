@@ -162,6 +162,7 @@ data class SummaryDto(
     @Json(name = "verified") val verified: Boolean = false,
     @Json(name = "payoutMsisdn") val payoutMsisdn: String? = null,
     @Json(name = "accountStatus") val accountStatus: String = "ACTIVE",
+    @Json(name = "accountStatusReason") val accountStatusReason: String = "",
     @Json(name = "payoutsEnabled") val payoutsEnabled: Boolean = false,
     @Json(name = "frozen") val frozen: Boolean = false,
     @Json(name = "hasInFlightWithdrawal") val hasInFlightWithdrawal: Boolean = false,

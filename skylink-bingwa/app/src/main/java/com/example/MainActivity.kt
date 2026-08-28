@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -196,8 +198,19 @@ fun SkylinkBingwaApp(
     val syncOrchestrator = remember(app) { app?.syncOrchestrator }
     val notificationEngine = remember(app) { app?.notificationEngine }
 
-    // The user-visible "refresh" button on Home/Offers/Help/Referrals: pulls
-    // config, catalogue and billboards right now rather than waiting for the next
+    // One Snackbar host for the whole app: every "refresh" button (Home, Offers,
+    // Help, Referrals) reports through it, so tapping refresh always says whether
+    // it worked instead of just spinning and going quiet.
+    val appSnackbarHostState = remember { SnackbarHostState() }
+    fun announce(message: String) {
+        scope.launch {
+            appSnackbarHostState.currentSnackbarData?.dismiss()
+            appSnackbarHostState.showSnackbar(message, withDismissAction = true)
+        }
+    }
+
+    // The user-visible "refresh" button on Home/Offers/Help: pulls config,
+    // catalogue and billboards right now rather than waiting for the next
     // scheduled check. MANUAL_REFRESH has no throttle, so this always does a real
     // fetch even if an incremental sync just ran a moment ago.
     var manualSyncing by remember { mutableStateOf(false) }
@@ -205,11 +218,26 @@ fun SkylinkBingwaApp(
         scope.launch {
             manualSyncing = true
             try {
-                syncOrchestrator?.sync(SyncTrigger.MANUAL_REFRESH) ?: run {
+                val orchestrator = syncOrchestrator
+                if (orchestrator != null) {
+                    val outcome = orchestrator.sync(SyncTrigger.MANUAL_REFRESH)
+                    announce(
+                        when {
+                            outcome.failed.isNotEmpty() -> "Couldn't refresh — check your connection and try again"
+                            outcome.synced.isNotEmpty() -> "Updated"
+                            else -> "Already up to date"
+                        }
+                    )
+                } else {
+                    // No orchestrator (unconfigured build/tests): fall back to the
+                    // direct calls so an unwired build still refreshes.
                     repository.syncRemoteConfig()
                     repository.syncCatalogue()
                     repository.syncBillboards()
+                    announce("Updated")
                 }
+            } catch (t: Throwable) {
+                announce("Couldn't refresh — check your connection and try again")
             } finally {
                 manualSyncing = false
             }
@@ -612,6 +640,7 @@ fun SkylinkBingwaApp(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = appSnackbarHostState) },
         bottomBar = {
             if (showBottomBar && activeOfferForPurchase == null) {
                 SkylinkBingwaBottomNav(
@@ -781,7 +810,18 @@ fun SkylinkBingwaApp(
                         state = referralState,
                         withdrawState = referralWithdraw,
                         onBack = { navController.popBackStack() },
-                        onRefresh = { scope.launch { referralRepository.refresh(msisdn) } },
+                        onRefresh = {
+                            scope.launch {
+                                referralRepository.refresh(msisdn)
+                                announce(
+                                    if (referralRepository.state.value.offline) {
+                                        "Couldn't refresh — check your connection and try again"
+                                    } else {
+                                        "Updated"
+                                    }
+                                )
+                            }
+                        },
                         onWithdraw = { scope.launch { referralRepository.beginWithdrawal(msisdn) } },
                         onSubmitOtp = { code -> scope.launch { referralRepository.verifyOtp(msisdn, code) } },
                         onResendOtp = { scope.launch { referralRepository.requestOtp(msisdn) } },

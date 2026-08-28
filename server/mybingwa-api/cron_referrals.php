@@ -422,8 +422,16 @@ function task_integrity(PDO $pdo, callable $out): void
             . ' cached=' . $row['balance_cents'] . ' ledger=' . $row['ledger_total']);
     }
 
+    // OTP codes are hashed and single-use, so an old row carries no live risk — but
+    // "no reason to keep it" is still a reason to not keep it. A full day past
+    // expiry is well clear of anything a support conversation would still need.
+    $purged = $pdo->exec(
+        'DELETE FROM ' . ref_t('otp_challenges') . ' WHERE expires_at < ' . $pdo->quote(gmdate('Y-m-d H:i:s', time() - 86400))
+    );
+
     $out('integrity: ' . count($drift) . ' referrers with drift'
-        . (count($drift) ? ' — INVESTIGATE, cache NOT auto-corrected' : ''));
+        . (count($drift) ? ' — INVESTIGATE, cache NOT auto-corrected' : '')
+        . '; ' . (int) $purged . ' expired OTP code(s) purged');
 }
 
 /* ========================================================================== */

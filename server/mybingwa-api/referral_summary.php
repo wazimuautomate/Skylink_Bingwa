@@ -152,6 +152,7 @@ json_out([
     'verified'            => $referrer['verified_msisdn'] !== null,
     'payoutMsisdn'        => $isAuthed ? $referrer['verified_msisdn'] : null,
     'accountStatus'       => $referrer['status'],
+    'accountStatusReason' => $referrer['status'] !== 'ACTIVE' ? (string) ($referrer['status_reason'] ?? '') : '',
     'payoutsEnabled'      => (int) $settings['referral_payouts_enabled'] === 1,
     'frozen'              => $frozen,
     'hasInFlightWithdrawal' => $hasInFlight,
