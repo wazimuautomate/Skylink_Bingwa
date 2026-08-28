@@ -59,6 +59,7 @@ jobs:
           local-dir: server/mybingwa-api/
           server-dir: ./
           dangerous-clean-slate: false
+          log-level: verbose
           exclude: |
             config.php
             **/tests/**
@@ -77,6 +78,7 @@ jobs:
           local-dir: server/admin-v2/
           server-dir: admin/
           dangerous-clean-slate: false
+          log-level: verbose
           exclude: |
             config/config.php
             uploads/**
