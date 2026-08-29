@@ -69,6 +69,9 @@ final class ReferralsController extends Controller
             'devices'   => ReferralRepository::blockedDevices(20),
             'events'    => ReferralRepository::recentEvents(40),
             'settings'  => self::currentSettings(),
+            // Never the value itself -- just whether one has been saved, so the
+            // page can say "set" / "not set" without ever displaying a secret.
+            'b2cPasswordSet' => trim((string) Settings::get('b2c_initiator_password', '')) !== '',
         ]);
     }
 
@@ -193,12 +196,22 @@ final class ReferralsController extends Controller
             Settings::set($key, (string) $value);
         }
 
+        // B2C initiator password: blank means "leave the current one alone" --
+        // this field never shows the saved value back, so there is nothing to
+        // "clear" by leaving it empty, and Safaricom resets are infrequent enough
+        // that most saves of this form won't touch it at all.
+        $newB2cPassword = trim((string) $request->post('b2c_initiator_password', ''));
+        $b2cPasswordChanged = $newB2cPassword !== '';
+        if ($b2cPasswordChanged) {
+            Settings::set('b2c_initiator_password', $newB2cPassword);
+        }
+
         Audit::log([
             'action'      => 'referrals.settings',
             'entity_type' => 'referral_settings',
             'entity_id'   => 'global',
             'before'      => $before,
-            'after'       => $after,
+            'after'       => $after + ['b2c_initiator_password' => $b2cPasswordChanged ? '(changed)' : '(unchanged)'],
         ]);
 
         // The kill switch deserves an unmistakable message either way.
@@ -206,6 +219,8 @@ final class ReferralsController extends Controller
             Flash::success($after['referral_payouts_enabled']
                 ? 'Settings saved. AUTOMATIC PAYOUTS ARE NOW ON — withdrawals will be sent to M-Pesa.'
                 : 'Settings saved. AUTOMATIC PAYOUTS ARE NOW OFF — no money will leave the account.');
+        } elseif ($b2cPasswordChanged) {
+            Flash::success('Settings saved. The B2C initiator password has been updated — the next payout run will use it.');
         } else {
             Flash::success('Referral settings saved.');
         }

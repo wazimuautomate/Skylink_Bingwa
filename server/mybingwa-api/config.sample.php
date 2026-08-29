@@ -149,6 +149,13 @@ $config['b2c_security_credential'] = '';
 // Alternative to the above: give the PLAIN initiator password plus a path to
 // Safaricom's public certificate, and the server encrypts it on each call. Only
 // used when b2c_security_credential is empty.
+//
+// This is the one Safaricom forces you to change every few weeks. Once you have
+// set a password on the Referrals page in the admin panel, THAT value overrides
+// whatever is here (cron_referrals.php reads it fresh from the database on every
+// run) -- so after the first setup you never need to touch this file again for a
+// routine password reset. b2c_initiator_password here only matters as the
+// starting value / a fallback if the admin panel has never been used to set one.
 $config['b2c_initiator_password'] = '';
 $config['b2c_cert_path'] = '';
 

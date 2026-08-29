@@ -13,7 +13,7 @@ final class Audit
     private const SENSITIVE = [
         'password', 'password_hash', 'totp_secret', 'recovery_codes', 'passkey',
         'consumer_secret', 'consumer_key', 'app_key', 'callback_secret',
-        'sms_userid', 'sms_password',
+        'sms_userid', 'sms_password', 'b2c_initiator_password',
         'private_key', 'secret', 'db_pass',
     ];
 

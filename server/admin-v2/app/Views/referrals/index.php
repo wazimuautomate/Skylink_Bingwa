@@ -270,6 +270,24 @@ $programmeOn = (int) $settings['referral_enabled'] === 1;
       </div>
     </div>
 
+    <h3>B2C payout credential</h3>
+    <div class="form-grid mb">
+      <div class="field">
+        <label for="s-b2c-pass">
+          New initiator password
+          <span class="status <?= $b2cPasswordSet ? 'active' : 'requested' ?>" style="margin-left:8px">
+            <?= $b2cPasswordSet ? 'Set' : 'Not set' ?>
+          </span>
+        </label>
+        <input id="s-b2c-pass" type="password" name="b2c_initiator_password" autocomplete="new-password"
+               placeholder="<?= $b2cPasswordSet ? '••••••••' : 'Not set yet' ?>">
+        <div class="hint">
+          Leave blank to keep it unchanged. Safaricom expires this every few weeks —
+          paste the new one here when it does; the next payout run picks it up automatically, no redeploy needed.
+        </div>
+      </div>
+    </div>
+
     <h3>Anti-fraud</h3>
     <div class="form-grid">
       <div class="field">

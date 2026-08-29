@@ -53,6 +53,13 @@ $pdo = require __DIR__ . '/db.php';
 ref_provision($pdo);
 $settings = ref_settings($pdo);
 
+// Safaricom expires the B2C initiator password periodically. Whoever last saved
+// one on the Referrals admin page wins over whatever (if anything) is in
+// config.php, so a reset never needs a code change or a redeploy.
+if (($dbPassword = b2c_password_from_db($pdo)) !== null) {
+    $config['b2c_initiator_password'] = $dbPassword;
+}
+
 $out = static function (string $line): void {
     echo $line . "\n";
 };

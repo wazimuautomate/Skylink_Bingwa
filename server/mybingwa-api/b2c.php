@@ -30,7 +30,11 @@
  *  1. `b2c_security_credential` in config — the base64 blob generated in the
  *     Daraja portal. This is what most deployments use.
  *  2. `b2c_initiator_password` + `b2c_cert_path` — encrypt the plain initiator
- *     password with Safaricom's public certificate ourselves.
+ *     password with Safaricom's public certificate ourselves. The password here
+ *     normally comes from config.php, but cron_referrals.php overlays it with
+ *     whatever is saved on the Referrals admin page (see b2c_password_from_db())
+ *     before calling anything in this file, since that value changes far more
+ *     often — Safaricom expires it periodically — than anything else here does.
  *
  * Returns null when neither is configured, which the caller reports as a
  * configuration error rather than attempting a doomed payout.
@@ -59,6 +63,29 @@ function b2c_security_credential(array $config): ?string
         return null;
     }
     return base64_encode($encrypted);
+}
+
+/**
+ * The initiator password as most recently set from the admin panel, or null if
+ * none has ever been saved there.
+ *
+ * Safaricom forces a periodic reset of this password. Without this, that reset
+ * meant editing config.php on the server every few weeks. Now it is one field on
+ * the Referrals settings page: read straight as a string here, unlike
+ * ref_settings() which blanket-casts every value to (int) and would destroy a
+ * password on the way through.
+ */
+function b2c_password_from_db(PDO $pdo): ?string
+{
+    try {
+        $stmt = $pdo->prepare('SELECT svalue FROM ' . ref_t('settings') . ' WHERE skey = ? LIMIT 1');
+        $stmt->execute(['b2c_initiator_password']);
+        $row = $stmt->fetch();
+        $value = $row ? trim((string) $row['svalue']) : '';
+        return $value !== '' ? $value : null;
+    } catch (Throwable $e) {
+        return null;
+    }
 }
 
 /** True when every credential a payout needs is present. */
