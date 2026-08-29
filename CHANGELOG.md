@@ -10,6 +10,31 @@ Sections used: `Added`, `Changed`, `Fixed`, `Removed`, `Security`, `Internal`
 
 ## [Unreleased]
 
+## [1.0.19] - 2026-08-29
+
+### Changed
+
+- **Refer & Earn moved to the bottom navigation bar**, replacing its top-bar gift
+  icon; **Settings moved to the top bar** (right of the new refresh icon) in its
+  place. Refer & Earn is now a primary destination like Home/Offers/Activity/Help
+  rather than a screen reached from the header, so it no longer has its own back
+  button — the bottom nav is where it's left from.
+
+### Internal
+
+Server-side only — nothing here required an app change, but all of it affects what
+this version's users actually experience once they use Refer & Earn:
+
+- The real SMS gateway (HostPinnacle) is now wired in for referral OTP codes and
+  "someone joined" notifications, replacing a guessed contract that was never
+  going to deliver a real text.
+- The B2C initiator password Safaricom periodically forces a reset on is now
+  stored in the database and edited from the admin panel, instead of requiring a
+  server file edit and redeploy every time it expires.
+- Registering with a phone number already on file (a reinstall, or the app
+  retrying a failed first attempt) no longer overwrites that customer's name —
+  the number is the account; the first name recorded stands.
+
 ## [1.0.18] - 2026-08-28
 
 ### Added

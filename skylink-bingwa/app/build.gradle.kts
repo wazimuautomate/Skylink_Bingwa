@@ -24,8 +24,8 @@ android {
     // GitHub and Play channels and updates supersede correctly (same signing
     // identity — see signingConfigs + docs/RELEASE_PLAYSTORE.md). Bump BOTH for
     // every release; versionCode must only ever increase.
-    versionCode = 19
-    versionName = "1.0.18"
+    versionCode = 20
+    versionName = "1.0.19"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
