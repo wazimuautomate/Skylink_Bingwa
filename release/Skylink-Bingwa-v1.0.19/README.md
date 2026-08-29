@@ -6,18 +6,20 @@
 
 | File | What it is |
 |---|---|
-| `Skylink-Bingwa-v1.0.19-direct-debug.apk` | **Test build.** Debug-signed, installs as *Skylink Bingwa Dev* alongside your live app. |
-| `...apk.sha256` | Checksum for the above. |
+| `Skylink-Bingwa-v1.0.19-direct.apk` | **The real release.** Signed with the permanent upload keystore. This is the file to actually distribute — download and install directly, no debug label, replaces the live app on a device that already has it. |
+| `Skylink-Bingwa-v1.0.19-direct.apk.sha256` | Checksum for the above. |
+| `Skylink-Bingwa-v1.0.19-play.aab` | The Google Play bundle. **Upload this to the Play Console only** — an AAB is not directly installable on a phone. |
+| `Skylink-Bingwa-v1.0.19-play.aab.sha256` | Checksum for the above. |
+| `Skylink-Bingwa-v1.0.19-direct-debug.apk` | Debug test build — installs as *Skylink Bingwa Dev*, side by side with the real app, for testing without touching your production install. Not for distribution. |
+| `Skylink-Bingwa-v1.0.19-direct-debug.apk.sha256` | Checksum for the debug build. |
 
-**This is not the customer release.** Built by the `Feature debug build` GitHub Actions
-workflow off commit `3aa95d5` on `main`, which carries the real `PAYMENTS_APP_KEY` /
-`PAYMENTS_BASE_URL` repo secrets — a plain local `./gradlew assembleDebug` cannot do
-that, and a build without the real key installs fine but has every server call
-(registration, Refer & Earn, payments) silently rejected with 401.
+Both signed files come from the tagged `v1.0.19` GitHub Release, built by the
+`Release (signed)` workflow — the one that uses the permanent signing keystore and
+only ever runs on a version tag, never on an ordinary push. Same identity as every
+previous signed release (last one before this: `v1.0.16`), so this update installs
+cleanly over an existing install rather than needing a fresh one.
 
-This build merges two things that were developed in parallel and are now both on
-`main`: the icon reshuffle from your own session, and everything server-side from
-this one. Confirmed no file overlap between them — the merge was clean, no conflicts.
+Public release page: https://github.com/wazimuautomate/Skylink_Bingwa/releases/tag/v1.0.19
 
 ## What changed since v1.0.18
 
@@ -83,6 +85,6 @@ real-world secrets and Safaricom process steps only you can supply.
   this session (GitHub Actions `Server checks`), and every server file deployed
   this session was independently confirmed live via a direct HTTP check
   (`X-Powered-By: PHP` on the deployed endpoint) — not just a green deploy log.
-- CI: `Feature debug build` assembles and uploads the APK successfully every time;
-  the workflow shows red only because of the pre-existing test gate above, not the
-  build itself.
+- `Release (signed)` workflow run: succeeded — both `assembleDirectRelease` and
+  `bundlePlayRelease` built clean, and both artifacts here are verified against
+  the checksums the workflow itself produced (`sha256sum -c` passed).
