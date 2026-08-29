@@ -13,8 +13,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * Settings is now a primary bottom-navigation destination (owner request), so it
- * must render and route like every other tab.
+ * Referrals is now a primary bottom-navigation destination (owner request), so
+ * it must render and route like every other tab. Settings moved to the header.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
@@ -24,24 +24,24 @@ class SkylinkBingwaBottomNavComposeTest {
     val composeRule = createComposeRule()
 
     @Test
-    fun `settings destination renders in the bottom navigation`() {
+    fun `referrals destination renders in the bottom navigation`() {
         composeRule.setContent {
             SkylinkBingwaTheme {
                 SkylinkBingwaBottomNav(currentRoute = "home", onNavigate = {})
             }
         }
-        composeRule.onNodeWithTag("nav_item_settings").assertIsDisplayed()
+        composeRule.onNodeWithTag("nav_item_referrals").assertIsDisplayed()
     }
 
     @Test
-    fun `tapping settings routes to the settings destination`() {
+    fun `tapping referrals routes to the referrals destination`() {
         var routed: String? = null
         composeRule.setContent {
             SkylinkBingwaTheme {
                 SkylinkBingwaBottomNav(currentRoute = "home", onNavigate = { routed = it.route })
             }
         }
-        composeRule.onNodeWithTag("nav_item_settings").performClick()
-        assertEquals("settings", routed)
+        composeRule.onNodeWithTag("nav_item_referrals").performClick()
+        assertEquals("referrals", routed)
     }
 }

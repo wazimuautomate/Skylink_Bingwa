@@ -522,7 +522,7 @@ fun SkylinkBingwaApp(
     LaunchedEffect(pendingDeepLink) {
         val route = pendingDeepLink ?: return@LaunchedEffect
         when (route) {
-            "home", "offers", "activity", "help", "settings" -> {
+            "home", "offers", "activity", "help", "referrals" -> {
                 navController.navigate(route) {
                     popUpTo("home") { saveState = true }
                     launchSingleTop = true
@@ -530,7 +530,7 @@ fun SkylinkBingwaApp(
                 }
             }
             "notifications" -> showNotifications = true
-            "referrals" -> navController.navigate("referrals") { launchSingleTop = true }
+            "settings" -> navController.navigate("settings") { launchSingleTop = true }
             else -> { /* unknown route — ignore */ }
         }
         onConsumeDeepLink()
@@ -538,7 +538,7 @@ fun SkylinkBingwaApp(
 
     // Hide navigation behind the non-dismissible "Update required" gate.
     val showBottomBar = !updateRequired &&
-        currentRoute in listOf("home", "offers", "activity", "help", "settings")
+        currentRoute in listOf("home", "offers", "activity", "help", "referrals")
 
     // Resolve details/purchase offers against the live catalogue so favourite
     // toggles inside a sheet stay reflected.
@@ -607,7 +607,7 @@ fun SkylinkBingwaApp(
             }
             promo.clickActionOrNone == PromotionClickAction.INTERNAL_ROUTE -> {
                 val route = promo.clickTarget
-                if (route in listOf("home", "offers", "activity", "help", "settings")) {
+                if (route in listOf("home", "offers", "activity", "help", "referrals")) {
                     navController.navigate(route) {
                         popUpTo("home") { saveState = true }
                         launchSingleTop = true
@@ -735,7 +735,7 @@ fun SkylinkBingwaApp(
                         onUndoFavourite = onUndoFavourite,
                         onPromotionAction = onPromotionAction,
                         onNotifClick = { showNotifications = true },
-                        onReferralClick = { navController.navigate("referrals") },
+                        onSettingsClick = { navController.navigate("settings") },
                         onSyncClick = triggerManualSync,
                         syncing = manualSyncing,
                         onOfflineClick = {
@@ -809,7 +809,6 @@ fun SkylinkBingwaApp(
                     ReferralScreen(
                         state = referralState,
                         withdrawState = referralWithdraw,
-                        onBack = { navController.popBackStack() },
                         onRefresh = {
                             scope.launch {
                                 referralRepository.refresh(msisdn)
@@ -837,6 +836,7 @@ fun SkylinkBingwaApp(
                     SettingsScreen(
                         profile = userProfile,
                         currentTheme = appTheme,
+                        onBack = { navController.popBackStack() },
                         onUpdateProfile = { name, phone -> repository.updateProfile(name, phone) },
                         onThemeSelect = { theme -> repository.setAppTheme(theme) },
                         onClearLocalData = {

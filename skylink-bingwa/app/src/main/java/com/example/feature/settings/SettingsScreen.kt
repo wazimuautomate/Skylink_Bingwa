@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.DeleteForever
@@ -80,6 +81,7 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(
     profile: UserProfile,
     currentTheme: AppThemeSetting,
+    onBack: () -> Unit,
     onUpdateProfile: (String, String) -> Unit,
     onThemeSelect: (AppThemeSetting) -> Unit,
     onClearLocalData: () -> Unit,
@@ -111,12 +113,24 @@ fun SettingsScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Text(
-            text = "Settings",
-            style = TypographyPageHeading.copy(fontSize = 24.sp),
-            color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack, modifier = Modifier.testTag("settings_back")) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            Text(
+                text = "Settings",
+                style = TypographyPageHeading.copy(fontSize = 24.sp),
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
+            )
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
 

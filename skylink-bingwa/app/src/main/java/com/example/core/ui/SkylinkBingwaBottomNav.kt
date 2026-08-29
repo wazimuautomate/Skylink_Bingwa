@@ -18,7 +18,7 @@ import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LocalOffer
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Redeem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,15 +31,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
-// Primary destinations. Per owner request (2026-07-24) Settings is a bottom-nav
-// destination and the notification centre opens as an overlay from the Home
-// header, so the header no longer carries a profile/avatar control.
+// Primary destinations. Per owner request (2026-08-29) Refer & Earn is a
+// bottom-nav destination and Settings moved to the header (top-right, opened
+// from its own icon); the notification centre still opens as an overlay from
+// the Home header.
 enum class BottomNavDestination(val route: String, val label: String, val icon: ImageVector) {
     HOME("home", "Home", Icons.Outlined.Home),
     OFFERS("offers", "Offers", Icons.Outlined.LocalOffer),
     ACTIVITY("activity", "Activity", Icons.Outlined.History),
     HELP("help", "Help", Icons.Outlined.HelpOutline),
-    SETTINGS("settings", "Settings", Icons.Outlined.Settings)
+    REFERRALS("referrals", "Referrals", Icons.Outlined.Redeem)
 }
 
 @Composable
