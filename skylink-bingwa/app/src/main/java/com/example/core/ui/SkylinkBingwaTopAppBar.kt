@@ -15,8 +15,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Redeem
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -45,7 +45,7 @@ fun SkylinkBingwaTopAppBar(
     syncing: Boolean = false,
     onNotifClick: () -> Unit = {},
     onOfflineClick: () -> Unit = {},
-    onReferralClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
     onSyncClick: () -> Unit = {}
 ) {
     Row(
@@ -98,23 +98,8 @@ fun SkylinkBingwaTopAppBar(
             Spacer(modifier = Modifier.width(8.dp))
         }
 
-        // Refer & Earn. It sits in the header rather than the bottom bar because the
-        // bottom bar is already full at five destinations, and a sixth would squeeze
-        // every label. This is also a reward surface, not a primary shopping
-        // destination — the header is where it belongs.
-        IconButton(
-            onClick = onReferralClick,
-            modifier = Modifier.testTag("referral_button")
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Redeem,
-                contentDescription = "Refer and earn",
-                tint = BrandGreen
-            )
-        }
-
         // Notification Icon with Badge (opens the notification-centre overlay).
-        // Settings moved to the bottom navigation, so no profile avatar here.
+        // Refer & Earn moved to the bottom navigation, so no reward icon here.
         Box(contentAlignment = Alignment.TopEnd) {
             IconButton(
                 onClick = onNotifClick,
@@ -155,6 +140,20 @@ fun SkylinkBingwaTopAppBar(
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }
+        }
+
+        // Settings. Moved here from the bottom bar so the bottom bar can carry
+        // Refer & Earn instead; Settings is a utility surface, not a primary
+        // shopping destination, so the header is where it belongs.
+        IconButton(
+            onClick = onSettingsClick,
+            modifier = Modifier.testTag("settings_button")
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Settings,
+                contentDescription = "Settings",
+                tint = MaterialTheme.colorScheme.onBackground
+            )
         }
     }
 }

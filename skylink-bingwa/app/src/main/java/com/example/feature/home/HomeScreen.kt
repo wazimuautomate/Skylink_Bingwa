@@ -86,7 +86,7 @@ fun HomeScreen(
     onPromotionAction: (Promotion) -> Unit,
     onNotifClick: () -> Unit,
     onOfflineClick: () -> Unit,
-    onReferralClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
     onSyncClick: () -> Unit = {},
     syncing: Boolean = false
 ) {
@@ -130,7 +130,7 @@ fun HomeScreen(
                 syncing = syncing,
                 onNotifClick = onNotifClick,
                 onOfflineClick = onOfflineClick,
-                onReferralClick = onReferralClick,
+                onSettingsClick = onSettingsClick,
                 onSyncClick = onSyncClick
             )
 

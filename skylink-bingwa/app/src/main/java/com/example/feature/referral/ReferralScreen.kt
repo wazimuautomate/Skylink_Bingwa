@@ -40,7 +40,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Group
@@ -113,7 +112,6 @@ private fun Long.asKsh(): String {
 fun ReferralScreen(
     state: ReferralState,
     withdrawState: WithdrawUiState,
-    onBack: () -> Unit,
     onRefresh: () -> Unit,
     onWithdraw: () -> Unit,
     onSubmitOtp: (String) -> Unit,
@@ -130,7 +128,7 @@ fun ReferralScreen(
             .statusBarsPadding()
             .imePadding()
     ) {
-        ReferralTopBar(onBack = onBack, onRefresh = onRefresh, loading = state.loading)
+        ReferralTopBar(onRefresh = onRefresh, loading = state.loading)
 
         Column(
             modifier = Modifier
@@ -227,17 +225,14 @@ fun ReferralScreen(
 /* ------------------------------------------------------------------ top bar */
 
 @Composable
-private fun ReferralTopBar(onBack: () -> Unit, onRefresh: () -> Unit, loading: Boolean) {
+private fun ReferralTopBar(onRefresh: () -> Unit, loading: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onBack, modifier = Modifier.testTag("referral_back")) {
-            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
-        }
         Text(
             text = "Refer & Earn",
             style = MaterialTheme.typography.titleLarge,
