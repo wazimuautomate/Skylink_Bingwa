@@ -1,0 +1,39 @@
+name: _diag referral endpoints (temporary)
+
+# TEMPORARY diagnostic. Curls the live referral endpoints using the real
+# PAYMENTS_APP_KEY secret so we can see the actual server response (GitHub
+# masks the secret value in logs automatically). Deleted after use.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    env:
+      APP_KEY: ${{ secrets.PAYMENTS_APP_KEY }}
+      BASE_URL: ${{ secrets.PAYMENTS_BASE_URL }}
+    steps:
+      - name: check_referral_code.php
+        run: |
+          echo "Base URL host only: $(echo "$BASE_URL" | sed -E 's#https?://##; s#/.*##')"
+          curl -s -o /tmp/out1.json -w "HTTP:%{http_code}\n" \
+            -H "X-App-Key: $APP_KEY" \
+            "${BASE_URL}check_referral_code.php?code=SK391R"
+          echo "Body:"; cat /tmp/out1.json; echo
+
+      - name: referral_summary.php
+        run: |
+          curl -s -o /tmp/out2.json -w "HTTP:%{http_code}\n" \
+            -X POST -H "X-App-Key: $APP_KEY" -H "Content-Type: application/json" \
+            -d '{"msisdn":"254700000000"}' \
+            "${BASE_URL}referral_summary.php"
+          echo "Body:"; cat /tmp/out2.json; echo
+
+      - name: register_user.php (control — known-good pipeline)
+        run: |
+          curl -s -o /tmp/out3.json -w "HTTP:%{http_code}\n" \
+            -X POST -H "X-App-Key: $APP_KEY" -H "Content-Type: application/json" \
+            -d '{"name":"Diag Test","msisdn":"254700000001","appVersion":"diag"}' \
+            "${BASE_URL}register_user.php"
+          echo "Body:"; cat /tmp/out3.json; echo
