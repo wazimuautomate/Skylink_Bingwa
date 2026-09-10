@@ -17,6 +17,7 @@ use App\Core\Request;
 use App\Services\ChangeDetector;
 use App\Services\PublishingService;
 use App\Services\ResourceVersions;
+use App\Services\ServiceLock;
 
 final class PublishController extends Controller
 {
@@ -47,6 +48,12 @@ final class PublishController extends Controller
     {
         Csrf::check($request);
         $this->guard('publish.execute');
+
+        // Service lock: publishing is how content reaches a device, so it is blocked too.
+        if (ServiceLock::isLocked()) {
+            Flash::error('Request Denied — the app is blocked. Nothing can be published while the service lock is on.');
+            $this->redirect('/publish');
+        }
 
         // The operator must consciously agree that this reaches real devices.
         if ((string) $request->post('confirm', '') !== 'yes') {

@@ -32,6 +32,7 @@ use App\Core\Response;
 use App\Services\PublishingService;
 use App\Services\RateLimiter;
 use App\Services\ResourceVersions;
+use App\Services\ServiceLock;
 use Throwable;
 
 final class SyncController
@@ -50,9 +51,14 @@ final class SyncController
 
     /* ------------------------------------------------------------------ gate */
 
-    /** Per-IP rate limit + an optional shared X-Sync-Key. */
+    /** The global service lock, then a per-IP rate limit + an optional shared X-Sync-Key. */
     private function gate(Request $request): void
     {
+        // The service lock is checked FIRST and refuses every endpoint on this controller,
+        // health included: while it is on, this server publishes nothing to any device.
+        if (ServiceLock::isLocked()) {
+            Response::json(ServiceLock::payload(), 503, ['Retry-After' => '3600', 'Cache-Control' => 'no-store']);
+        }
         $perMinute = (int) Config::get('sync.rate_limit_per_minute', 60);
         if (!RateLimiter::allow('sync:' . $request->ip(), $perMinute)) {
             Response::json(['error' => 'rate_limited'], 429, ['Retry-After' => '60']);

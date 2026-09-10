@@ -32,6 +32,17 @@ $draftCount = (int) ($publishStatus['draftCount'] ?? 0);
         <?php if ($key === 'preview' && $draftCount > 0): ?><span class="nav__badge"><?= $draftCount ?></span><?php endif; ?>
       </a>
     <?php endforeach; ?>
+
+    <?php if (App\Core\Auth::isSuperAdmin()): ?>
+      <?php /* Super Admin only. Deliberately not in $nav and not in SettingsController::PAGES,
+               so it can never be granted to a partner Admin. The controller re-checks. */ ?>
+      <a class="nav__item nav__item--danger <?= ($activeNav ?? '') === 'danger' ? 'is-active' : '' ?>"
+         href="<?= e(url('/danger-zone')) ?>" title="Danger zone">
+        <?= icon('warning', 20) ?>
+        <span>Danger zone</span>
+        <?php if (App\Services\ServiceLock::isLocked()): ?><span class="nav__badge nav__badge--danger">ON</span><?php endif; ?>
+      </a>
+    <?php endif; ?>
   </nav>
 
   <div class="nav__footer">

@@ -27,6 +27,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     json_out(['status' => 'FAILED', 'errorCode' => 'METHOD_NOT_ALLOWED'], 405);
 }
 require_app_key($config);
+// Global service lock (Admin V2 -> Danger zone). Refuses with 503 "Request Denied".
+deny_if_service_locked($config);
 
 $body = json_decode(file_get_contents('php://input'), true) ?: [];
 $digits = preg_replace('/\D/', '', (string) ($body['msisdn'] ?? ''));

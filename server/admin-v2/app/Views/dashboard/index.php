@@ -38,6 +38,11 @@ $tagClass = static function (string $category): string {
     return in_array($c, ['data', 'sms', 'minutes', 'special'], true) ? $c : 'muted';
 };
 ?>
+<?php /* Shown on top of the dashboard only while the service lock is on; renders nothing otherwise. */ ?>
+<?= App\Core\View::partial('partials/service_lock_notice', [
+      'serviceLock'  => $serviceLock ?? [],
+      'isSuperAdmin' => $isSuperAdmin ?? false,
+    ]) ?>
 <style>
   /* Page-scoped: clickable cards, the four-way tile split and the 14-day bars. */
   .dash-card { display: block; color: inherit; text-decoration: none;
