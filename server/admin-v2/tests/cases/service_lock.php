@@ -40,3 +40,24 @@ test('an empty reason falls back to the default wording', function () use ($lock
 test('the refusal title is exactly "Request Denied"', function () {
     eq(ServiceLock::TITLE, 'Request Denied');
 });
+
+/* ---- what the blocked message must and must not say ---- */
+
+test('the default reason states the fact and the consequence, never a cause', function () {
+    $reason = ServiceLock::DEFAULT_REASON;
+    // The client reads this text. Why the service was suspended is a conversation to
+    // have with them directly — it must never be published on a 503 page.
+    foreach (['developer', 'invoice', 'unpaid', 'unsettled', 'owe', 'debt', ' by '] as $forbidden) {
+        ok(stripos($reason, $forbidden) === false, "the default reason must not mention '{$forbidden}'");
+    }
+    eq($reason,
+        'This service has been suspended. The app and the server remain unavailable '
+        . 'until the suspension is lifted.');
+});
+
+test('the danger zone is not a grantable page', function () {
+    // A partner Admin can only ever be given a key from SettingsController::PAGES.
+    // 'danger' must never appear there, or the switch becomes delegable by mistake.
+    ok(!array_key_exists('danger', \App\Controllers\SettingsController::PAGES), 'danger must not be grantable');
+    ok(!in_array('danger', array_keys(\App\Controllers\SettingsController::PAGES), true));
+});

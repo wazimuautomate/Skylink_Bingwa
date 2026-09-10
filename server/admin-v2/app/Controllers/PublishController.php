@@ -50,8 +50,9 @@ final class PublishController extends Controller
         $this->guard('publish.execute');
 
         // Service lock: publishing is how content reaches a device, so it is blocked too.
+        // Worded so it never hints at the Super-Admin-only switch behind it.
         if (ServiceLock::isLocked()) {
-            Flash::error('Request Denied — the app is blocked. Nothing can be published while the service lock is on.');
+            Flash::error('Request Denied — the app is currently blocked, so nothing can be published.');
             $this->redirect('/publish');
         }
 
