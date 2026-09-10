@@ -154,6 +154,12 @@ $router->get('/settings/admins',           [App\Controllers\SettingsController::
 $router->post('/settings/admins/save',     [App\Controllers\SettingsController::class, 'saveAdmin']);
 $router->post('/settings/admins/{id}/disable', [App\Controllers\SettingsController::class, 'disableAdmin']);
 
+/* --------------------------------------------------------------- danger zone */
+// The global service lock. Super Admin only — see DangerZoneController; the page key
+// is intentionally absent from SettingsController::PAGES so it can never be granted.
+$router->get('/danger-zone',       [App\Controllers\DangerZoneController::class, 'index']);
+$router->post('/danger-zone/save', [App\Controllers\DangerZoneController::class, 'save']);
+
 /* --------------------------------------------------------------- publishing */
 $router->get('/preview',              [App\Controllers\PreviewController::class, 'index']);
 $router->get('/preview/diff',         [App\Controllers\PreviewController::class, 'diff']);

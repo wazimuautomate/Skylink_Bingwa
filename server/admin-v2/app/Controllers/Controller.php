@@ -14,6 +14,7 @@ use App\Core\Response;
 use App\Core\Session;
 use App\Core\View;
 use App\Services\PublishingService;
+use App\Services\ServiceLock;
 
 abstract class Controller
 {
@@ -40,6 +41,9 @@ abstract class Controller
             'isSuperAdmin'  => Auth::isSuperAdmin(),
             'flashes'       => Flash::take(),
             'publishStatus' => PublishingService::status(),
+            // Every page carries the lock state so the shell (and the dashboard notice)
+            // can show that the app is currently blocked. Reading it is one cached query.
+            'serviceLock'   => ServiceLock::state(),
             'activeNav'     => $data['activeNav'] ?? '',
             'pageTitle'     => $data['pageTitle'] ?? 'Skylink Bingwa Admin',
         ];

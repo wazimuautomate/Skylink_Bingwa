@@ -27,6 +27,133 @@ function require_app_key(array $config): void
     }
 }
 
+// ---------------------------------------------------------------------------
+// Global service lock (the admin panel's "Danger zone" switch).
+//
+// The Super Admin can suspend the whole product from Admin V2 -> Danger zone. The
+// switch is five rows in the admin's `mb_settings` table, which lives in THIS same
+// database, so these endpoints read it directly rather than calling the admin.
+//
+// Every app-facing endpoint calls deny_if_service_locked() immediately after
+// require_app_key(). What deliberately does NOT call it: callback.php,
+// b2c_result.php and b2c_timeout.php. Those are Safaricom's server-to-server
+// callbacks reporting money that has ALREADY moved; refusing them would strand a
+// real customer's payment as unreconciled. stk.php and withdraw.php are locked, so
+// no new payment can enter that path while the lock is on.
+//
+// FAIL OPEN on any database or configuration error: a read that failed closed would
+// take the whole product down on a transient DB fault, and the admin page that lifts
+// the lock could not be trusted to lift it.
+// ---------------------------------------------------------------------------
+
+/** Table prefix Admin V2 writes its own tables under (config `admin_prefix`, default `mb_`). */
+function admin_table_prefix(array $config): string
+{
+    $prefix = (string) ($config['admin_prefix'] ?? 'mb_');
+    // Interpolated into SQL below, so it is restricted to an identifier-safe shape.
+    return preg_match('/^[A-Za-z0-9_]{0,32}$/', $prefix) === 1 ? $prefix : 'mb_';
+}
+
+/**
+ * The current lock state.
+ *
+ * @return array{enabled:bool, amount:int, reason:string, since:string}
+ */
+function service_lock_state(?array $config = null): array
+{
+    static $cached = null;
+    if ($cached !== null) {
+        return $cached;
+    }
+
+    $default_reason = 'This service has been suspended by the developer because of an unsettled '
+        . 'development invoice. The app and the server stay unavailable until the '
+        . 'outstanding balance is paid in full.';
+    $off = ['enabled' => false, 'amount' => 0, 'reason' => $default_reason, 'since' => ''];
+
+    try {
+        if ($config === null) {
+            // `require` is a low-precedence construct — keep it out of an expression.
+            $config = require __DIR__ . '/config.php';
+        }
+        $pdo = new PDO(
+            "mysql:host={$config['db_host']};dbname={$config['db_name']};charset=utf8mb4",
+            $config['db_user'],
+            $config['db_pass'],
+            [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
+            ]
+        );
+        $table = admin_table_prefix($config) . 'settings';
+        $stmt = $pdo->prepare("SELECT skey, svalue FROM {$table} WHERE skey LIKE ?");
+        $stmt->execute(['service_lock.%']);
+
+        $raw = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $raw[(string) $row['skey']] = (string) ($row['svalue'] ?? '');
+        }
+        $reason = trim($raw['service_lock.reason'] ?? '');
+
+        return $cached = [
+            'enabled' => ($raw['service_lock.enabled'] ?? '0') === '1',
+            'amount'  => max(0, (int) ($raw['service_lock.amount'] ?? 0)),
+            'reason'  => $reason !== '' ? $reason : $default_reason,
+            'since'   => trim($raw['service_lock.enabled_at'] ?? ''),
+        ];
+    } catch (Throwable $e) {
+        return $cached = $off; // fail open — see the block comment above
+    }
+}
+
+/** One human sentence: the reason, plus the outstanding balance when one is named. */
+function service_lock_message(array $lock): string
+{
+    $message = (string) $lock['reason'];
+    if ((int) $lock['amount'] > 0) {
+        $message .= ' Outstanding balance: KSh ' . number_format((int) $lock['amount']) . '.';
+    }
+    return $message;
+}
+
+/**
+ * The body every blocked client receives.
+ *
+ * It carries the refusal under `status`, `errorCode` AND `error` because the two server
+ * halves speak slightly different dialects (the sync API answers `{"error": ...}`, the
+ * payment API `{"status": ..., "errorCode": ...}`) and a blocked client must recognise
+ * the refusal whichever endpoint it happened to call. Kept in step with
+ * App\Services\ServiceLock::payload() in the admin.
+ */
+function service_lock_payload(array $lock): array
+{
+    return [
+        'blocked'   => true,
+        'status'    => 'REQUEST_DENIED',
+        'error'     => 'request_denied',
+        'errorCode' => 'REQUEST_DENIED',
+        'title'     => 'Request Denied',
+        'message'   => service_lock_message($lock),
+        'reason'    => (string) $lock['reason'],
+        'amountKsh' => (int) $lock['amount'],
+        'currency'  => 'KES',
+        'since'     => (string) $lock['since'],
+    ];
+}
+
+/** Refuse this request with HTTP 503 "Request Denied" when the lock is on. */
+function deny_if_service_locked(?array $config = null): void
+{
+    $lock = service_lock_state($config);
+    if (!$lock['enabled']) {
+        return;
+    }
+    header('Retry-After: 3600');
+    header('Cache-Control: no-store');
+    json_out(service_lock_payload($lock), 503);
+}
+
 /**
  * The latest PUBLISHED app snapshot from the admin (Admin V2 writes it into the SAME
  * database under the mb_ prefix). Returns the decoded array, or null if the admin is

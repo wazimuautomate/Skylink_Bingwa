@@ -24,6 +24,7 @@ use App\Core\Flash;
 use App\Core\Request;
 use App\Core\Validator;
 use App\Services\FcmService;
+use App\Services\ServiceLock;
 use Throwable;
 
 final class PushController extends Controller
@@ -88,6 +89,13 @@ final class PushController extends Controller
     {
         Csrf::check($request);
         $this->guard('notifications.create');
+
+        // Service lock: nothing may be sent TO a device while the app is blocked.
+        if (ServiceLock::isLocked()) {
+            Flash::error('Request Denied — the app is blocked. No push notification can be sent while the service lock is on.');
+            $this->redirect('/push');
+            return;
+        }
 
         $input = [
             'title' => trim((string) $request->post('title', '')),

@@ -45,6 +45,19 @@ if (!$isCli) {
     header('Content-Type: text/plain; charset=utf-8');
 }
 
+// Global service lock (Admin V2 -> Danger zone). While it is on, the cron does no work:
+// it matures no commissions, sends no push and starts no payout. Nothing is lost — the
+// next run after the lock is lifted picks up everything that came due meanwhile.
+$lock = service_lock_state($config);
+if ($lock['enabled']) {
+    if (!$isCli) {
+        http_response_code(503);
+    }
+    echo "request denied: service lock is on
+";
+    exit;
+}
+
 $task = $isCli
     ? (string) ($argv[1] ?? 'all')
     : (string) ($_GET['task'] ?? 'all');

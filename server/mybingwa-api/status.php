@@ -14,6 +14,8 @@ $config = require __DIR__ . '/config.php';
 require __DIR__ . '/lib.php';
 
 require_app_key($config);
+// Global service lock (Admin V2 -> Danger zone). Refuses with 503 "Request Denied".
+deny_if_service_locked($config);
 
 $clientId   = (string) ($_GET['clientRequestId'] ?? '');
 $orderRef   = (string) ($_GET['orderReference'] ?? '');
