@@ -22,15 +22,35 @@ request. No publish, no deploy, no new APK/AAB is involved.
 Both server halves share the same MySQL database, so the legacy API reads the very same
 five rows the admin writes — there is no second switch to keep in step.
 
-## Who can reach it
+## Who can reach it — and who may know it exists
 
-Super Admin only. `DangerZoneController` calls `Rbac::requireSuperAdmin()` on **both** the
-page and the save, and the page key is deliberately **not** in `SettingsController::PAGES`,
-so it cannot be granted to a partner Admin even by mistake. The sidebar item is likewise
-only rendered for a Super Admin — but hiding a link is never the control; the controller is.
+Super Admin only, and **invisible** to everyone else. A partner Admin must not merely be
+refused this page; they must not be able to learn that it is there. Four things enforce
+that, and each one is load-bearing:
 
-The dashboard notice is shown to **every** admin while the lock is on. That is the point:
-it is how the account owner learns the product is blocked and why.
+1. **The route answers 404, not 403.** `DangerZoneController::requireSuperAdminOrHide()`
+   sends a signed-in non-super admin to `Response::notFound()` — the same page a mistyped
+   URL produces. A 403 would confirm the URL is real and name the permission it wants. On
+   `POST /danger-zone/save` the hide runs *before* the CSRF check, so the route cannot be
+   distinguished by getting a 419 instead of a 404.
+2. **It cannot be granted.** The page key is absent from `SettingsController::PAGES`, the
+   only source a partner Admin's `allowed_pages` can draw from.
+3. **The sidebar item is Super-Admin-only.** Hiding a link is never the control — the
+   controller is — but it keeps the panel honest.
+4. **The audit trail is filtered.** Service-lock rows name the switch, the amount, the
+   reason and who threw it. `AuditController::HIDDEN_MODULE` removes `module =
+   'service_lock'` from the listing, the filter dropdowns, the CSV export and the
+   single-entry page for anyone who is not a Super Admin. The condition is applied in
+   `buildWhere()`, the one choke point the listing and the export share, so no combination
+   of filters or free-text search can surface such a row.
+
+Flash messages on the Push and Publish pages say only that *the app is currently blocked*.
+They never name the switch or where it lives.
+
+**What a partner Admin does see:** the dashboard notice while the lock is on — the warning
+that the app cannot be used and the amount outstanding, with no route, no actor name and
+no hint that a setting produced it. That is deliberate: the account owner has to learn the
+product is blocked and why.
 
 ## What it stores
 
@@ -43,6 +63,21 @@ it is how the account owner learns the product is blocked and why.
 | `service_lock.enabled_by` | Name of the Super Admin who turned it on |
 
 Editing the amount while already locked does **not** reset `enabled_at`.
+
+`DEFAULT_REASON` is duplicated in `ServiceLock` and in `lib.php` (the two halves share no
+code). It reads:
+
+> This service has been suspended. The app and the server remain unavailable until the
+> suspension is lifted.
+
+Deliberately generic: the **fact** and the **consequence**, with no cause and no
+attribution. The client reads this text, and why the service was suspended is a
+conversation to have with them directly rather than something published on a 503 page. The
+outstanding amount is appended separately, and only when one is set.
+
+A test in `tests/cases/service_lock.php` fails if the wording ever regains a cause
+("invoice", "unpaid", "developer", …) or an attribution. **Keep the two copies
+byte-identical.**
 
 ## What a blocked client receives
 

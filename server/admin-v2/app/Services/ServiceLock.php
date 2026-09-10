@@ -45,11 +45,17 @@ final class ServiceLock
     /** The single error title every blocked client is shown. */
     public const TITLE = 'Request Denied';
 
-    /** Used when the operator leaves the reason box empty. */
+    /**
+     * Used when the operator leaves the reason box empty.
+     *
+     * Deliberately GENERIC: it states the fact and the consequence, and gives no cause
+     * and no attribution. The client reads this text — the conversation about *why*
+     * happens between the two of you, not on a 503 page. Keep it byte-identical to
+     * $default_reason in server/mybingwa-api/lib.php.
+     */
     public const DEFAULT_REASON =
-        'This service has been suspended by the developer because of an unsettled '
-        . 'development invoice. The app and the server stay unavailable until the '
-        . 'outstanding balance is paid in full.';
+        'This service has been suspended. The app and the server remain unavailable '
+        . 'until the suspension is lifted.';
 
     private static ?array $cache = null;
 

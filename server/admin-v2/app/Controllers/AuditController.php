@@ -12,6 +12,7 @@
 
 namespace App\Controllers;
 
+use App\Core\Auth;
 use App\Core\Database;
 use App\Core\Request;
 use App\Support\Csv;
@@ -20,7 +21,24 @@ final class AuditController extends Controller
 {
     private const PER_PAGE = 40;
 
+    /**
+     * Audit module that only a Super Admin may ever see.
+     *
+     * The service lock is Super-Admin-only and deliberately invisible to a partner
+     * Admin — see DangerZoneController. Its audit rows name the switch, the amount and
+     * the reason, so leaving them in a log a partner Admin can read would give the whole
+     * feature away through the back door. They are filtered out of the listing, the
+     * filter dropdowns, the CSV export and the single-entry page.
+     */
+    private const HIDDEN_MODULE = 'service_lock';
+
     private function table(): string { return Database::table('audit_logs'); }
+
+    /** True when the signed-in admin may see service-lock rows. */
+    private static function seesHiddenModule(): bool
+    {
+        return Auth::isSuperAdmin();
+    }
 
     /** The filter set, read identically by the page and the export. */
     private function filters(Request $request): array
@@ -68,6 +86,10 @@ final class AuditController extends Controller
         $this->guard('audit.view');
         $row = Database::fetch('SELECT * FROM ' . $this->table() . ' WHERE id = ?', [(int) $id]);
         if (!$row) { $this->redirect('/audit'); }
+        // A hidden-module row reads exactly like a row that is not there.
+        if (!self::seesHiddenModule() && (string) ($row['module'] ?? '') === self::HIDDEN_MODULE) {
+            $this->redirect('/audit');
+        }
 
         $this->view('audit/show', [
             'activeNav' => 'audit', 'pageTitle' => 'Audit entry',
@@ -143,10 +165,16 @@ final class AuditController extends Controller
         if (!in_array($column, $allowed, true)) {
             return [];
         }
-        $rows = Database::fetchAll(
-            "SELECT DISTINCT {$column} AS v FROM " . Database::table('audit_logs')
-            . " WHERE {$column} <> '' ORDER BY {$column}"
-        );
+        $sql = "SELECT DISTINCT {$column} AS v FROM " . Database::table('audit_logs')
+             . " WHERE {$column} <> ''";
+        $params = [];
+        if (!self::seesHiddenModule()) {
+            // Keep the hidden module out of the dropdowns too — an option nobody can
+            // produce results for is itself a disclosure.
+            $sql .= " AND module <> ?";
+            $params[] = self::HIDDEN_MODULE;
+        }
+        $rows = Database::fetchAll($sql . " ORDER BY {$column}", $params);
         return array_map(static fn($r) => (string) $r['v'], $rows);
     }
 
@@ -154,6 +182,12 @@ final class AuditController extends Controller
     {
         $c = [];
         $p = [];
+        // Applied FIRST and unconditionally, so neither the listing nor the CSV export
+        // can be talked into returning a service-lock row by any combination of filters.
+        if (!self::seesHiddenModule()) {
+            $c[] = 'module <> ?';
+            $p[] = self::HIDDEN_MODULE;
+        }
         if (($f['q'] ?? '') !== '') {
             $c[] = '(action LIKE ? OR entity_id LIKE ? OR reason LIKE ?)';
             $like = '%' . $f['q'] . '%';

@@ -2,9 +2,17 @@
 /**
  * Danger zone — the global service lock.
  *
- * SUPER ADMIN ONLY. Every action here calls Rbac::requireSuperAdmin(), so a partner
- * Admin gets the 403 page even if they type the URL: the page key is never added to
- * SettingsController::PAGES, which means it cannot be granted to anyone.
+ * SUPER ADMIN ONLY, and INVISIBLE to everyone else.
+ *
+ * A partner Admin must not merely be refused this page — they must not be able to learn
+ * that it exists. So both actions answer a plain 404 (the same page a typo produces)
+ * rather than the 403 "you do not have permission" screen, which would confirm the URL
+ * is real and name the permission it wants. The page key is also never added to
+ * SettingsController::PAGES, so it cannot be granted to anyone, and the sidebar item is
+ * only rendered for a Super Admin.
+ *
+ * The one thing a partner Admin does see is the dashboard notice while the lock is on —
+ * the warning that the app is blocked, with no hint of where the switch lives.
  *
  * Turning the switch on refuses every app-facing request on this server immediately —
  * no publish, no deploy and no new app build is involved. Turning it off restores
@@ -15,10 +23,11 @@
 namespace App\Controllers;
 
 use App\Core\Audit;
+use App\Core\Auth;
 use App\Core\Csrf;
 use App\Core\Flash;
-use App\Core\Rbac;
 use App\Core\Request;
+use App\Core\Response;
 use App\Services\ServiceLock;
 
 final class DangerZoneController extends Controller
@@ -26,10 +35,24 @@ final class DangerZoneController extends Controller
     /** Highest amount the form will accept, so a slipped keystroke cannot store nonsense. */
     private const MAX_AMOUNT = 100000000;
 
-    public function index(Request $request): void
+    /**
+     * Signed in, and a Super Admin — or this page does not exist.
+     *
+     * requireAuth() sends a signed-out visitor to the login page exactly as every other
+     * admin route does, so that step reveals nothing. A signed-in partner Admin gets a
+     * 404: indistinguishable from a mistyped URL.
+     */
+    private function requireSuperAdminOrHide(): void
     {
         $this->requireAuth();
-        Rbac::requireSuperAdmin();
+        if (!Auth::isSuperAdmin()) {
+            Response::notFound();
+        }
+    }
+
+    public function index(Request $request): void
+    {
+        $this->requireSuperAdminOrHide();
 
         $this->view('danger/index', [
             'activeNav'      => 'danger',
@@ -41,9 +64,11 @@ final class DangerZoneController extends Controller
 
     public function save(Request $request): void
     {
+        // Hide BEFORE the CSRF check, so a partner Admin gets a uniform 404 here rather
+        // than a 419 that would distinguish this route from one that does not exist.
+        // The check reads the session and the user row only — it changes nothing.
+        $this->requireSuperAdminOrHide();
         Csrf::check($request);
-        $this->requireAuth();
-        Rbac::requireSuperAdmin();
 
         $before = ServiceLock::state();
 

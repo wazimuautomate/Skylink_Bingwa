@@ -66,9 +66,10 @@ function service_lock_state(?array $config = null): array
         return $cached;
     }
 
-    $default_reason = 'This service has been suspended by the developer because of an unsettled '
-        . 'development invoice. The app and the server stay unavailable until the '
-        . 'outstanding balance is paid in full.';
+    // Generic on purpose — states the fact and the consequence, never a cause. Kept
+    // character-for-character in step with App\Services\ServiceLock::DEFAULT_REASON.
+    $default_reason = 'This service has been suspended. The app and the server remain unavailable '
+        . 'until the suspension is lifted.';
     $off = ['enabled' => false, 'amount' => 0, 'reason' => $default_reason, 'since' => ''];
 
     try {

@@ -91,8 +91,10 @@ final class PushController extends Controller
         $this->guard('notifications.create');
 
         // Service lock: nothing may be sent TO a device while the app is blocked.
+        // The wording never names the switch or where it lives — a partner Admin must
+        // not learn the Danger zone exists from a flash message.
         if (ServiceLock::isLocked()) {
-            Flash::error('Request Denied — the app is blocked. No push notification can be sent while the service lock is on.');
+            Flash::error('Request Denied — the app is currently blocked, so no push notification can be sent.');
             $this->redirect('/push');
             return;
         }
